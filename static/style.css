@@ -1,173 +1,286 @@
 body {
-    font-size: 14px;
-    color: navy;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f8f8;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     height: 100vh;
+    margin: 0;
+    background-color: #ffffff;
 }
 
 .nav {
     background-color: navy;
-    color: white;
+    color: rgb(255, 255, 255);
     display: flex;
     justify-content: space-between;
-    padding: 10px;
+    padding: 5px 10px;
     align-items: center;
+    width: 100%;
+    height: 40px;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+    position: relative;
+
 }
 
 .icons {
     display: flex;
-    gap: 20px;
+    gap: 600px;    
+    position: relative;
+
 }
 
 .icon {
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
+    position: relative;
+
 }
 
+.icon:first-child::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -10px; /* Extend the red background to the left */
+    top: -10px;
+    width: 50px; /* Adjust width to fit the icon area */
+    height: 195%; /* Full height of the navbar */
+    background-color: rgb(199, 68, 68);
+    z-index: -1; /* Place behind the icon */
+}
+
+/* Vertical white lines around the second icon */
+.icon:nth-child(2)::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -15px; /* Adjust left position for the left line */
+    width: 2px; /* Width of the line */
+    height: 195%; /* Full height of the navbar */
+    background-color: white;
+    z-index: -1; /* Place behind the icon */
+}
+
+.icon:nth-child(2)::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    right: -15px; /* Adjust right position for the right line */
+    width: 2px; /* Width of the line */
+    height: 200%; /* Full height of the navbar */
+    background-color: rgb(255, 255, 255);
+    z-index: -1; /* Place behind the icon */
+}
+
+
 .time {
-    font-size: 16px;
+    font-family: 'Inter';
+    font-size: 30px;
 }
 
 .content {
     font-family: 'Inter';
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
     flex-grow: 1;
     padding: 20px;
+    margin-top: 40px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.table-container {
+.container {
     display: flex;
     flex-direction: column;
-    width: 90%;
+    align-items: flex-start;
+    position: relative;
 }
 
 table {
-    width: 100%;
-    height: 60%;
-    border-spacing: 0;
-    outline: 2px solid navy;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    width: auto;
 }
 
 td {
-    outline: 2px solid navy;
-    width: 50%;
-    height: 25%;
+    border: 3px solid navy;
+    padding: 15px;
     text-align: left;
-    vertical-align: middle;
-    color: navy;
-    padding: 10px;
-    box-sizing: border-box;
+    position: relative;
+    width: 100px; /* Adjust width as needed */
+    height: 120px; /* Adjust height as needed */
 }
 
 .circled {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    border: 2px solid navy;
+    border: 3px solid navy;
     border-radius: 50px;
-    width: 80px;
-    height: 60px;
+    width: 130px;
+    height: 100px;
+    position: absolute;
+    top: 5px;
+    left: 5px;
     margin: 0;
     padding: 0;
     color: navy;
-    background-color: #f8f8f8;
+    background-color: #ffffff;
     text-align: center;
     box-sizing: border-box;
-    font-size: 16px;
+    font-size: 35px;
     font-weight: bold;
 }
 
 .variable {
-    display: inline-block;
-    margin-left: 10px;
-    font-size: 40px;
-    font-weight: normal;
-}
-
-.buttons {
-    display: flex;
-    border: 2px solid navy;
-    border-top: none;
-}
-
-.table-button {
-    flex-grow: 1;
-    outline: 2px solid navy;
-    background-color: #f8f8f8;
+    font-size: 80px;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
     color: navy;
-    font-size: 16px;
-    font-weight: bold;
-    margin: 0;
-    padding: 10px;
+
 }
 
+.unit {
+    font-size: 30px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: navy;
+
+}
+
+button {
+    background-color: #ffffff;
+    width: 100%;
+    height: 100%;
+    border: none;
+    cursor: pointer;
+    font-size: 40px;
+    color: navy;
+}
+
+button:hover {
+    background-color: #ffffff;
+}
 
 .side-buttons {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 10px); /* Adjust the space between the table and buttons */
     display: flex;
     flex-direction: column;
-    margin-left: 20px;
+    align-items: center;
 }
 
 .connected-buttons {
     display: flex;
     flex-direction: column;
-    border: 2px solid navy;
+    border: 3px solid navy;
+
 }
 
 .connected-buttons button {
     flex-grow: 1;
     border: none;
-    border-top: 2px solid navy;
-    background-color: #f8f8f8;
+    border-top: 3px solid navy;
+    background-color: #ffffff;
     color: navy;
-    font-size: 16px;
+    height: 110px;
+    width: 150px;
+    font-size: 60px;
     font-weight: bold;
     margin: 0;
     padding: 10px;
 }
 
-.circled-button {
+.connected-buttons button:first-child {
+    border-top: 0; /* Remove the top border from the first button */
+}
+
+.last-row td {
+    font-size: 40px;
+    color: navy;
+    height: 80px; /* Set height for last row */
+    padding: 10px; /* Adjust padding if necessary */
+}
+
+.circle-button {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    border: 2px solid navy;
+    border: 3px solid navy;
     border-radius: 50px;
-    width: 80px;
-    height: 60px;
+    height: 90px;
+    width: 150px;
     margin: 10px 0;
-    background-color: #f8f8f8;
+    background-color: #ffffff;
     color: navy;
-    font-size: 16px;
+    font-size: 40px;
     font-weight: bold;
 }
 
-.bottom-right-button {
+.rect-button {
+    height: 110px;
+    width: 150px;
+    border: 3px solid navy;
+    background-color: #ffffff;
+    color: navy;
+    font-size: 40px;
+    font-weight: bold;
     position: absolute;
-    bottom: 20px;
-    right: 20px;
-    border: 2px solid navy;
-    background-color: #f8f8f8;
-    color: navy;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 10px 20px;
-    box-sizing: border-box;
-}
-
-.unit {
-    margin-left: 10px;
+    top: calc(100% + 160px); /* Move down by the height of the table row plus margin */
 }
 
 .safe {
-    background-color: #d4edda;
+    background-color: #ffffff;
 }
 
 .unsafe {
     background-color: #fffc39;
+}
+
+
+.disabled i {
+    color: rgb(125, 125, 170)
+}
+
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 50%;
+    top: 50%;
+    width: 80%; /* Adjust as needed */
+    height: 80%; /* Adjust as needed */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: navy; /* Background color */
+    transform: translate(-50%, -50%);
+}
+
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 3px solid navy;
+    width: 80%; /* Could be more or less, depending on screen size */
+    text-align: center;
+}
+
+.close {
+    color: navy;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: red;
+    text-decoration: none;
+    cursor: pointer;
 }

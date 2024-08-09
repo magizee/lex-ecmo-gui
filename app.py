@@ -1,6 +1,8 @@
 from flask import Flask, redirect, render_template, jsonify
 import random
+import json
 
+# Initialize flask app
 app = Flask(__name__)
 
 # Define your safety range limits
@@ -11,7 +13,7 @@ safety_ranges = {
     'p_art': (100, 180),
     't_art': (35, 40),
     'svo2': (70, 90),
-    'delta_p': (5, 15)
+    'delta_p': (5, 15),
 }
 
 # Example values
@@ -24,11 +26,20 @@ svo2 = 83.0
 delta_p = 11
 rpm = 4000
 
+def load_data():
+    with open('data.json', 'r') as f:
+        return json.load(f)
+
+
 def check_safety(value, range):
     return range[0] <= value <= range[1]
 
 @app.route('/')
-def index():
+def home():
+    return render_template('home.html')
+
+@app.route('/dashboard')
+def dashboard():
     safety_status = {
         'flow_rate': check_safety(flow_rate, safety_ranges['flow_rate']),
         'p_ven': check_safety(p_ven, safety_ranges['p_ven']),
@@ -36,9 +47,13 @@ def index():
         'p_art': check_safety(p_art, safety_ranges['p_art']),
         't_art': check_safety(t_art, safety_ranges['t_art']),
         'svo2': check_safety(svo2, safety_ranges['svo2']),
-        'delta_p': check_safety(delta_p, safety_ranges['delta_p'])
+        'delta_p': check_safety(delta_p, safety_ranges['delta_p']),
     }
-    return render_template('index.html', rom=rpm, flow_rate=flow_rate, p_ven=p_ven, p_int=p_int, p_art=p_art, t_art=t_art, svo2=svo2, delta_p=delta_p, safety_status=safety_status)
+    return render_template('dashboard.html', rpm=rpm, flow_rate=flow_rate, p_ven=p_ven, p_int=p_int, p_art=p_art, t_art=t_art, svo2=svo2, delta_p=delta_p, safety_status=safety_status)
+
+@app.route('/admin')
+def admin():
+    return render_template("admin.html")
 
 @app.route('/update')
 def update():
