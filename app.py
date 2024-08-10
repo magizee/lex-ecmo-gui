@@ -40,14 +40,14 @@ def cleanValues():
     global svo2
     global delta_p
     global rpm
-    flow_rate = float(flow_rate)
-    p_ven = float(p_ven)
-    p_int = float(p_int)
-    p_art = float(p_art)
-    t_art = float(t_art)
-    svo2 = float(svo2)
-    delta_p = float(delta_p)
-    rpm = float(rpm)
+    flow_rate = round(float(flow_rate),2)
+    p_ven = round(float(p_ven),2)
+    p_int = round(float(p_int),2)
+    p_art = round(float(p_art),2)
+    t_art = round(float(t_art),2)
+    svo2 = round(float(svo2),2)
+    delta_p = round(float(delta_p),2)
+    rpm = int(rpm)
 @app.route('/admin/exampleScenario1Loading', methods=['POST'])
 def exampleScenario1Loading():
     timer = request.form['example1Length']
@@ -72,9 +72,9 @@ def exampleScenario1(timer):
     currentTimer = int(time.time() - startTime)
     print(Vstatic)
     while (currentTimer) <= timer:
-        flow_rate = Vstatic + (currentTimer/timer) * (65-Vstatic)
-        p_ven = PvenStatic + (currentTimer/timer) * (75-PvenStatic)
-        svo2 = SvO2Static + (currentTimer/timer) * (80-SvO2Static)
+        flow_rate = round(Vstatic + (currentTimer/timer) * (65-Vstatic),2)
+        p_ven = round(PvenStatic + (currentTimer/timer) * (75-PvenStatic),2)
+        svo2 = round(SvO2Static + (currentTimer/timer) * (80-SvO2Static),2)
         currentTimer = int(time.time() - startTime)
     
     return redirect('/admin')
