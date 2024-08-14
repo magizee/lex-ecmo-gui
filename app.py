@@ -177,5 +177,12 @@ def update():
         safety_status=safety_status
     )
 
+@app.route('/rpm')
+def getRPM():
+    global rpm
+    return jsonify(
+        rpm=rpm
+        )
+
 if __name__ == '__main__':
     app.run(debug=True)

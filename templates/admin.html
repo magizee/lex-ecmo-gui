@@ -69,6 +69,9 @@
 
         <input id="example1Button" type="submit" value="Example 1">
     </form>
+    <h1 id="RPM-Display">
+        RPM: 0
+    </h1>
     <input type="hidden" id="V" name="custId" value={{V}}>
     <input type="hidden" id="Pven" name="custId" value={{Pven}}>
     <input type="hidden" id="Pint" name="custId" value={{Pint}}>
@@ -78,6 +81,16 @@
     <input type="hidden" id="Tart" name="custId" value={{Tart}}>
 
     <script>
+
+        function updateRPM() {
+            fetch('/rpm')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('RPM-Display').innerHTML = "RPM: " + data.rpm;
+                });
+        }
+        setInterval(updateRPM, 1000);
+
         function checkValues() {
             //if (document.getElementById('VS') != document.getElementById('V').getAttribute("value") || document.getElementById('PvenS').value != document.getElementById('Pven').getAttribute("value") || document.getElementById('PintS').value != document.getElementById('Pint').getAttribute("value") || document.getElementById('DeltaPS').value != document.getElementById('DeltaP').getAttribute("value") || document.getElementById('PartS').value != document.getElementById('Part').getAttribute("value") || document.getElementById('SvO2S').value != document.getElementById('SvO2').getAttribute("value")) {
             document.getElementById('SliderEnterButton').style.backgroundColor = 'lightgreen';
@@ -146,7 +159,6 @@
             checkValueSlider(document.getElementById('TartS'));
         });
     </script>
-
 
 </body>
 </html>
