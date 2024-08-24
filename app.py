@@ -21,40 +21,131 @@ safety_ranges = {
 
 # Example values
 flow_rate = 2.52
+flow_rateMax = 100
+flow_rateMin = 0
+
 p_ven = -11
+p_venMax = 100
+p_venMin = 0
+
 p_int = 191
+p_intMax = 100
+p_intMin = 0
+
 p_art = 180
+p_artMax = 100
+p_artMin = 0
+
 t_art = 37.6
+t_artMax = 100
+t_artMin = 0
+
 svo2 = 83.0
+svo2Max = 100
+svo2Min = 0
+
 delta_p = 11
+delta_pMax = 100
+delta_pMin = 0
+
 rpm = 4000
+rpmMax = 8000
+rpmMin = 0
 
 # Back end code
 
 def cleanValues():
     global flow_rate
+    global flow_rateMax
+    global flow_rateMin
     global p_ven
+    global p_venMax
+    global p_venMin
     global p_int
+    global p_intMax
+    global p_intMin
     global p_art
+    global p_artMax
+    global p_artMin
     global t_art
+    global t_artMax
+    global t_artMin
     global svo2
+    global svo2Max
+    global svo2Min
     global delta_p
+    global delta_pMax
+    global delta_pMin
     global rpm
+    global rpmMax
+    global rpmMin
     flow_rate = round(float(flow_rate),2)
+    flow_rateMax = round(float(flow_rateMax),2)
+    flow_rateMin = round(float(flow_rateMin),2)
     p_ven = round(float(p_ven),2)
+    p_venMax = round(float(p_venMax),2)
+    p_venMin = round(float(p_venMin),2)
     p_int = round(float(p_int),2)
+    p_intMax = round(float(p_intMax),2)
+    p_intMin = round(float(p_intMin),2)
     p_art = round(float(p_art),2)
+    p_artMax = round(float(p_artMax),2)
+    p_artMin = round(float(p_artMin),2)
     t_art = round(float(t_art),2)
+    t_artMax = round(float(t_artMax),2)
+    t_artMin = round(float(t_artMin),2)
     svo2 = round(float(svo2),2)
+    svo2Max = round(float(svo2Max),2)
+    svo2Min = round(float(svo2Min),2)
     delta_p = round(float(delta_p),2)
+    delta_pMax = round(float(delta_pMax),2)
+    delta_pMin = round(float(delta_pMin),2)
     rpm = int(rpm)
-@app.route('/admin/exampleScenario1Loading', methods=['POST'])
-def exampleScenario1Loading():
+    rpmMax = int(rpmMax)
+    rpmMin = int(rpmMin)
+@app.route('/admin/setPresets')
+def setPresets():
+    return render_template('setPresets.html')
+@app.route('/admin/setPresets/send', methods=['POST'])
+def setPresetsSend():
+    global flow_rateMax
+    global flow_rateMin
+    global p_venMax
+    global p_venMin
+    global p_intMax
+    global p_intMin
+    global p_artMax
+    global p_artMin
+    global t_artMax
+    global t_artMin
+    global svo2Max
+    global svo2Min
+    global delta_pMax
+    global delta_pMin
+
+    flow_rateMax = request.form['VHigh']
+    flow_rateMin = request.form['VLow']
+    p_venMax = request.form['PvenHigh']
+    p_venMin = request.form['PvenLow']
+    p_intMax = request.form['PintHigh']
+    p_intMin = request.form['PintLow']
+    p_artMax = request.form['PartHigh']
+    p_artMin = request.form['PartLow']
+    t_artMax = request.form['TartHigh']
+    t_artMin = request.form['TartLow']
+    svo2Max = request.form['SvO2High']
+    svo2Min = request.form['SvO2Low']
+    delta_pMax = request.form['DeltaPHigh']
+    delta_pMin = request.form['DeltaPLow']
+    cleanValues()
+    return redirect('/admin')
+@app.route('/admin/loading/<scen>', methods=['POST'])
+def exampleScenario1Loading(scen):
     timer = request.form['example1Length']
     if timer:
-        return render_template('loading.html', timer=timer)
+        return render_template('loading.html', scen=scen, timer=timer)
     else:
-        return render_template('loading.html', timer=5)
+        return render_template('loading.html', scen=scen, timer=5)
 
 @app.route('/admin/exampleScenario1/<timer>', methods=['GET'])
 def exampleScenario1(timer):
@@ -102,15 +193,29 @@ def sliders():
 @app.route('/admin')
 def controlPanel():
     global flow_rate
+    global flow_rateMax
+    global flow_rateMin
     global p_ven
+    global p_venMax
+    global p_venMin
     global p_int
+    global p_intMax
+    global p_intMin
     global p_art
+    global p_artMax
+    global p_artMin
     global t_art
+    global t_artMax
+    global t_artMin
     global svo2
+    global svo2Max
+    global svo2Min
     global delta_p
+    global delta_pMax
+    global delta_pMin
     global rpm
     cleanValues()
-    return render_template('admin.html', V=flow_rate, Pven=p_ven, Pint=p_int, Part=p_art, DeltaP=delta_p, Tart=t_art, SvO2=svo2)
+    return render_template('admin.html', V=flow_rate, Pven=p_ven, Pint=p_int, Part=p_art, DeltaP=delta_p, Tart=t_art, SvO2=svo2, VMin=flow_rateMin, VMax=flow_rateMax, PvenMin=p_venMin, PvenMax=p_venMax, PintMin=p_intMin, PintMax=p_intMax, PartMax=p_artMax, PartMin=p_artMin, TartMin=t_artMin, TartMax=t_artMax, SvO2Min=svo2Min, SvO2Max=svo2Max, DeltaPMin=delta_pMin, DeltaPMax=delta_pMax)
 
 @app.route('/admin/about')
 def about():

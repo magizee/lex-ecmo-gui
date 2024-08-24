@@ -33,37 +33,37 @@
 
 
     <form id="inputSliders" method="POST" action="/admin/sliders">
-        <input id="VS" type="range" min="0" max="100" step="0.5" name="VS" value="{{V}}" style="width: 75%" oninput="sliderChange(this.value)" />
+        <input id="VS" type="range" min={{VMin}} max={{VMax}} step="0.5" name="VS" value="{{V}}" style="width: 75%" oninput="sliderChange(this.value)" />
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V:
         <output id="VVal">{{V}}</output>
         <br />
-        <input id="PvenS" type="range" min="0" max="100" step="0.5" name="PvenS" value="{{Pven}}" style="width:75%" oninput="sliderChange(this.value)" />
+        <input id="PvenS" type="range" min={{PvenMin}} max={{PvenMax}} step="0.5" name="PvenS" value="{{Pven}}" style="width:75%" oninput="sliderChange(this.value)" />
         &nbsp;&nbsp;Pven:
         <output id="PvenVal">{{Pven}}</output>
         <br />
-        <input id="PintS" type="range" min="0" max="100" step="0.5" name="PintS" value="{{Pint}}" style="width:75%" oninput="sliderChange(this.value)" />
+        <input id="PintS" type="range" min={{PintMin}} max={{PintMax}} step="0.5" name="PintS" value="{{Pint}}" style="width:75%" oninput="sliderChange(this.value)" />
         &nbsp;&nbsp;Pint:
         <output id="PintVal">{{Pint}}</output>
         <br />
-        <input id="DeltaPS" type="range" min="0" max="100" step="0.5" name="DeltaPS" value="{{DeltaP}}" style="width:75%" oninput="sliderChange(this.value)" />
+        <input id="DeltaPS" type="range" min={{DeltaPMin}} max={{DeltaPMax}} step="0.5" name="DeltaPS" value="{{DeltaP}}" style="width:75%" oninput="sliderChange(this.value)" />
         DeltaP:
         <output id="DeltaPVal">{{DeltaP}}</output>
         <br />
-        <input id="PartS" type="range" min="0" max="100" step="0.5" name="PartS" value="{{Part}}" style="width:75%" oninput="sliderChange(this.value)" />
+        <input id="PartS" type="range" min={{PartMin}} max={{PartMax}} step="0.5" name="PartS" value="{{Part}}" style="width:75%" oninput="sliderChange(this.value)" />
         &nbsp;&nbsp;Part:
         <output id="PartVal">{{Part}}</output>
         <br />
-        <input id="SvO2S" type="range" min="0" max="100" step="0.5" name="SvO2S" value="{{SvO2}}" style="width:75%" oninput="sliderChange(this.value)" />
+        <input id="SvO2S" type="range" min={{SvO2Min}} max={{ScO2Max}} step="0.5" name="SvO2S" value="{{SvO2}}" style="width:75%" oninput="sliderChange(this.value)" />
         &nbsp;&nbsp;SvO2:
         <output id="SvO2Val">{{SvO2}}</output>
         <br />
-        <input id="TartS" type="range" min="0" max="100" step="0.5" name="TartS" value="{{Tart}}" style="width:75%" oninput="sliderChange(this.value)" />
+        <input id="TartS" type="range" min={{TartMin}} max={{TartMax}} step="0.5" name="TartS" value="{{Tart}}" style="width:75%" oninput="sliderChange(this.value)" />
         &nbsp;&nbsp;Tart:
         <output id="TartVal">{{Tart}}</output>
         <br />
         <input id="SliderEnterButton" type="submit" value="Send Values">
     </form>
-    <form id="exampleScenario1" method="POST" action="/admin/exampleScenario1Loading">
+    <form id="exampleScenario1" method="POST" action="/admin/loading/exampleScenario1">
         <br />
         <input id="example1Length" name="example1Length" type="text" />
 
