@@ -20,7 +20,7 @@ safety_ranges = {
 }
 
 # Example values
-flow_rate = 2.52
+flow_rate = 0
 flow_rateMax = 100
 flow_rateMin = 0
 
@@ -52,8 +52,51 @@ rpm = 4000
 rpmMax = 8000
 rpmMin = 0
 
-# Back end code
+flow_rate = (flow_rateMax + flow_rateMin)/2
+p_ven = (p_venMax + p_venMin)/2
+p_int = (p_intMax + p_intMin)/2
+p_art = (p_artMax + p_artMin)/2
+t_art = (t_artMax + t_artMin)/2
+svo2 = (svo2Max + svo2Min)/2
+delta_p = (delta_pMax + delta_pMin)/2
+rpm = rpmMin
 
+# Back end code
+def initValues():
+    global flow_rate
+    global flow_rateMax
+    global flow_rateMin
+    global p_ven
+    global p_venMax
+    global p_venMin
+    global p_int
+    global p_intMax
+    global p_intMin
+    global p_art
+    global p_artMax
+    global p_artMin
+    global t_art
+    global t_artMax
+    global t_artMin
+    global svo2
+    global svo2Max
+    global svo2Min
+    global delta_p
+    global delta_pMax
+    global delta_pMin
+    global rpm
+    global rpmMax
+    global rpmMin
+    
+    flow_rate = (flow_rateMax + flow_rateMin)/2
+    p_ven = (p_venMax + p_venMin)/2
+    p_int = (p_intMax + p_intMin)/2
+    p_art = (p_artMax + p_artMin)/2
+    t_art = (t_artMax + t_artMin)/2
+    svo2 = (svo2Max + svo2Min)/2
+    delta_p = (delta_pMax + delta_pMin)/2
+    rpm = rpmMin;
+    
 def cleanValues():
     global flow_rate
     global flow_rateMax
@@ -122,22 +165,36 @@ def setPresetsSend():
     global svo2Min
     global delta_pMax
     global delta_pMin
-
-    flow_rateMax = request.form['VHigh']
-    flow_rateMin = request.form['VLow']
-    p_venMax = request.form['PvenHigh']
-    p_venMin = request.form['PvenLow']
-    p_intMax = request.form['PintHigh']
-    p_intMin = request.form['PintLow']
-    p_artMax = request.form['PartHigh']
-    p_artMin = request.form['PartLow']
-    t_artMax = request.form['TartHigh']
-    t_artMin = request.form['TartLow']
-    svo2Max = request.form['SvO2High']
-    svo2Min = request.form['SvO2Low']
-    delta_pMax = request.form['DeltaPHigh']
-    delta_pMin = request.form['DeltaPLow']
+    if(request.form['VHigh'] != ""):
+        flow_rateMax = request.form['VHigh']
+    if(request.form['VLow'] != ""):
+        flow_rateMin = request.form['VLow']
+    if(request.form['PvenHigh'] != ""):
+        p_venMax = request.form['PvenHigh']
+    if(request.form['PvenLow'] != ""):
+        p_venMin = request.form['PvenLow']
+    if(request.form['PintHigh'] != ""):
+        p_intMax = request.form['PintHigh']
+    if(request.form['PintLow'] != ""):
+        p_intMin = request.form['PintLow']
+    if(request.form['PartHigh'] != ""):
+        p_artMax = request.form['PartHigh']
+    if(request.form['PartLow'] != ""):
+        p_artMin = request.form['PartLow']
+    if(request.form['TartHigh'] != ""):
+        t_artMax = request.form['TartHigh']
+    if(request.form['TartLow'] != ""):
+        t_artMin = request.form['TartLow']
+    if(request.form['SvO2High'] != ""):
+        svo2Max = request.form['SvO2High']
+    if(request.form['SvO2Low'] != ""):
+        svo2Min = request.form['SvO2Low']
+    if(request.form['DeltaPHigh'] != ""):
+        delta_pMax = request.form['DeltaPHigh']
+    if(request.form['DeltaPLow'] != ""):
+        delta_pMin = request.form['DeltaPLow']
     cleanValues()
+    initValues()
     return redirect('/admin')
 @app.route('/admin/loading/<scen>', methods=['POST'])
 def exampleScenario1Loading(scen):
