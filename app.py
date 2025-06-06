@@ -95,7 +95,7 @@ def initValues():
     t_art = (t_artMax + t_artMin)/2
     svo2 = (svo2Max + svo2Min)/2
     delta_p = (delta_pMax + delta_pMin)/2
-    rpm = rpmMin;
+    rpm = rpmMin
     
 def cleanValues():
     global flow_rate
@@ -347,4 +347,4 @@ def getRPM():
         )
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host= '0.0.0.0', port=9000, debug=False)

@@ -5,6 +5,7 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #ffffff;
+    overflow: hidden; 
 }
 
 .nav {
@@ -12,11 +13,11 @@ body {
     color: rgb(255, 255, 255);
     display: flex;
     justify-content: space-between;
-    padding: 5px 10px;
+    padding: 0.3125rem 0.625rem; /* 5px 10px */
     align-items: center;
     width: 100%;
-    height: 40px;
-    position: fixed;
+    height: 7vh; /* 40px */
+    position: flex;
     top: 0;
     z-index: 1000;
     box-sizing: border-box;
@@ -26,13 +27,13 @@ body {
 
 .icons {
     display: flex;
-    gap: 600px;    
+    gap: 50vw; /* 600px */
     position: relative;
 
 }
 
 .icon {
-    font-size: 18px;
+    font-size: 3vh; /* 18px */
     cursor: pointer;
     position: relative;
 
@@ -40,12 +41,11 @@ body {
 
 .icon:first-child::before {
     content: '';
-    position: absolute;
+    position: fixed;
     top: 0;
-    left: -10px; /* Extend the red background to the left */
-    top: -10px;
-    width: 50px; /* Adjust width to fit the icon area */
-    height: 195%; /* Full height of the navbar */
+    left: 0; /* -10px */
+    width: 7vh; /* 50px */
+    height: 7vh; /* Relative to parent */
     background-color: rgb(199, 68, 68);
     z-index: -1; /* Place behind the icon */
 }
@@ -54,10 +54,10 @@ body {
 .icon:nth-child(2)::before {
     content: '';
     position: absolute;
-    top: -10px;
-    left: -15px; /* Adjust left position for the left line */
-    width: 2px; /* Width of the line */
-    height: 195%; /* Full height of the navbar */
+    top: -0.625rem; /* -10px */
+    left: -0.9375rem; /* -15px */
+    width: 0.125rem; /* 2px */
+    height: 7vh;
     background-color: white;
     z-index: -1; /* Place behind the icon */
 }
@@ -65,10 +65,10 @@ body {
 .icon:nth-child(2)::after {
     content: '';
     position: absolute;
-    top: -10px;
-    right: -15px; /* Adjust right position for the right line */
-    width: 2px; /* Width of the line */
-    height: 200%; /* Full height of the navbar */
+    top: -0.625rem; /* -10px */
+    right: -0.9375rem; /* -15px */
+    width: 0.125rem; /* 2px */
+    height: 7vh;
     background-color: rgb(255, 255, 255);
     z-index: -1; /* Place behind the icon */
 }
@@ -76,7 +76,7 @@ body {
 
 .time {
     font-family: 'Inter';
-    font-size: 30px;
+    font-size: 5vh; /* 30px */
 }
 
 .content {
@@ -85,9 +85,9 @@ body {
     justify-content: flex-start;
     align-items: flex-start;
     flex-grow: 1;
-    padding: 20px;
-    margin-top: 40px;
-    width: 100%;
+    padding: 1.25rem; /* 20px */
+    margin-top: 0.1vh; /* 40px */
+    width: 80%;
     box-sizing: border-box;
 }
 
@@ -100,65 +100,65 @@ body {
 
 table {
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* 20px */
     width: auto;
+    height: auto;
 }
 
 td {
-    border: 3px solid navy;
-    padding: 15px;
+    border: 0.1875rem solid navy; /* 3px */
+    padding: 0.9375rem; /* 15px */
     text-align: left;
     position: relative;
-    width: 100px; /* Adjust width as needed */
-    height: 120px; /* Adjust height as needed */
+    width: 15vw; /* 100px */
+    height: 13vh; /* 120px */
 }
 
 .circled {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    border: 3px solid navy;
-    border-radius: 50px;
-    width: 130px;
-    height: 100px;
+    border: 0.1875rem solid navy; /* 3px */
+    border-radius: 3.125rem; /* 50px */
+    width: 11vw; /* 130px */
+    height: 10vh; /* 100px */
     position: absolute;
-    top: 5px;
-    left: 5px;
+    top: 0.3125rem; /* 5px */
+    left: 0.3125rem; /* 5px */
     margin: 0;
     padding: 0;
     color: navy;
     background-color: #ffffff;
     text-align: center;
     box-sizing: border-box;
-    font-size: 35px;
+    font-size: 5vh; /* 35px */
     font-weight: bold;
 }
 
 .variable {
-    font-size: 80px;
+    font-size: 10vh; /* 80px */
     position: absolute;
-    bottom: 5px;
-    right: 5px;
+    bottom: 0.3125rem; /* 5px */
+    right: 0.3125rem; /* 5px */
     color: navy;
 
 }
 
 .unit {
-    font-size: 30px;
+    font-size: 3vh; /* 30px */
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 0.3125rem; /* 5px */
+    right: 0.3125rem; /* 5px */
     color: navy;
-
 }
 
 button {
     background-color: #ffffff;
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    height: 90%;
     border: none;
     cursor: pointer;
-    font-size: 40px;
+    font-size: 2.5rem; /* 40px */
     color: navy;
 }
 
@@ -169,7 +169,7 @@ button:hover {
 .side-buttons {
     position: absolute;
     top: 0;
-    left: calc(100% + 10px); /* Adjust the space between the table and buttons */
+    left: calc(100% + 0.625rem); /* 10px */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -178,22 +178,25 @@ button:hover {
 .connected-buttons {
     display: flex;
     flex-direction: column;
-    border: 3px solid navy;
+    border: 0.1875rem solid navy;
 
 }
 
+/*
+home and dash button on right side
+*/
 .connected-buttons button {
     flex-grow: 1;
     border: none;
-    border-top: 3px solid navy;
+    border-top: 0.1875rem solid navy; /* 3px */
     background-color: #ffffff;
     color: navy;
-    height: 110px;
-    width: 150px;
-    font-size: 60px;
+    height: 12vh; /* 110px */
+    width: 13vw; /* 150px */
+    font-size: 5vh; /* 60px */
     font-weight: bold;
     margin: 0;
-    padding: 10px;
+    padding: 1vw; /* 10px */
 }
 
 .connected-buttons button:first-child {
@@ -201,37 +204,37 @@ button:hover {
 }
 
 .last-row td {
-    font-size: 40px;
+    font-size: 5vh; /* 40px */
     color: navy;
-    height: 80px; /* Set height for last row */
-    padding: 10px; /* Adjust padding if necessary */
+    height: 12vh; /* 80px */
+    padding: 0.1vh; /* 10px */
 }
 
 .circle-button {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    border: 3px solid navy;
-    border-radius: 50px;
-    height: 90px;
-    width: 150px;
-    margin: 10px 0;
+    border: 0.1875rem solid navy; /* 3px */
+    border-radius: 3.125rem; /* 50px */
+    height: 13vh; /* 90px */
+    width: 13vw; /* 150px */
+    margin: 0.625rem 0; /* 10px 0 */
     background-color: #ffffff;
     color: navy;
-    font-size: 40px;
+    font-size: 5vh; /* 40px */
     font-weight: bold;
 }
 
 .rect-button {
-    height: 110px;
-    width: 150px;
+    height: 11vh;
+    width: 13vw;
     border: 3px solid navy;
     background-color: #ffffff;
     color: navy;
-    font-size: 40px;
+    font-size: 5vh;
     font-weight: bold;
     position: absolute;
-    top: calc(100% + 160px); /* Move down by the height of the table row plus margin */
+    top: calc(100%); /* Move down by the height of the table row plus margin */
 }
 
 .safe {
@@ -274,7 +277,7 @@ button:hover {
 .close {
     color: navy;
     float: right;
-    font-size: 28px;
+    font-size: 7vh;
     font-weight: bold;
 }
 
