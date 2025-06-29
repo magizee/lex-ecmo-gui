@@ -16,6 +16,8 @@
         </div>
         <div class="time" id="current-time"></div>
     </div>
+    <div style="position:absolute; top:0; left:0; width:800px; height:400px; background-color:rgba(255,0,0,0.5); z-index:9999;"></div>
+
     <div class="content">
         <div class="container">
         <table>
@@ -93,8 +95,26 @@
             <div id="modal-text"></div>
         </div>
     </div>
+    
+    <div class="control-panel">
+        <div class="circle-container">
+            <div class="circle">
+            CARDIOHELP
+            <div class="marker"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
+        const joystick = document.getElementById("joystick");
+        const handle = document.getElementById("handle");
+        const output = document.getElementById("joystick");
+
+        const centerX = joystick.offsetWidth / 2;
+        const centerY = joystick.offsetHeight / 2;
+
+        
+        
         function showPopup(message) {
             document.getElementById('modal-text').innerText = message + ' Information';
             document.getElementById('myModal').style.display = "block";
