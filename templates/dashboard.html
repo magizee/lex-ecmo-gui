@@ -12,7 +12,7 @@
 <body>
     <div class="nav">
         <div class="icons">
-            <span class="icon" onclick="exitKiosk()" title="Exit Kiosk Mode"><i class="fa-solid fa-lungs"></i></span>
+            <span class="icon" onclick="exitBrowser()" style="cursor:pointer;"><i class="fa-solid fa-lungs"></i></span>
             <span class="icon"><i class="fa-solid fa-lock"></i></span>
         </div>
         <div class="time" id="current-time"></div>
@@ -229,16 +229,14 @@
     }
 </script>
     <script>
-        function exitKiosk() {
-            fetch('/shutdown')
-                .then(res => {
-                    if (res.ok) {
-                        alert("Exiting kiosk mode...");
-                    } else {
-                        alert("Failed to exit.");
-                    }
-                });
+       function exitBrowser() {
+            if (confirm("Exit kiosk mode?")) {
+                fetch('/exit-browser')
+                    .then(response => response.text())
+                    .then(data => console.log(data));
+            }
         }
+        
     </script>
 
 </body>
