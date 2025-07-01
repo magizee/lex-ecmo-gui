@@ -355,6 +355,11 @@ def joystick_data():
         print("Joystick RPM updated to:", rpm)
     return '', 204
 
+@app.route('/shutdown')
+def shutdown():
+    import subprocess
+    subprocess.Popen(['pkill', 'chromium-browser'])  # or 'chromium'
+    return "Browser shutdown triggered", 200
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0', port=9000, debug=False)

@@ -12,7 +12,7 @@
 <body>
     <div class="nav">
         <div class="icons">
-            <span class="icon"><i class="fa-solid fa-lungs"></i></span>
+            <span class="icon" onclick="exitKiosk()" title="Exit Kiosk Mode"><i class="fa-solid fa-lungs"></i></span>
             <span class="icon"><i class="fa-solid fa-lock"></i></span>
         </div>
         <div class="time" id="current-time"></div>
@@ -228,6 +228,18 @@
         isDragging = false;
     }
 </script>
+    <script>
+        function exitKiosk() {
+            fetch('/shutdown')
+                .then(res => {
+                    if (res.ok) {
+                        alert("Exiting kiosk mode...");
+                    } else {
+                        alert("Failed to exit.");
+                    }
+                });
+        }
+    </script>
 
 </body>
 </html>
