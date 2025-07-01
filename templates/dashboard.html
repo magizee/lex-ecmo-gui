@@ -16,7 +16,7 @@
         </div>
         <div class="time" id="current-time"></div>
     </div>
-    <div style="position:absolute; top:0; left:0; width:800px; height:400px; background-color:rgba(255,0,0,0.5); z-index:9999;"></div>
+    <div style="position:absolute; top:0; left:0; width:800px; height:400px; background-color:rgba(255, 0, 0, 0.163); z-index:-1;"></div>
 
     <div class="content">
         <div class="container">
@@ -98,7 +98,7 @@
     
     <div class="control-panel">
         <div class="circle-container">
-            <div class="circle">
+            <div class="circle" id="joystickKnob">
             CARDIOHELP
             <div class="marker"></div>
             </div>
@@ -106,19 +106,20 @@
     </div>
 
     <script>
-        const joystick = document.getElementById("joystick");
-        const handle = document.getElementById("handle");
-        const output = document.getElementById("joystick");
+        function updateRPM() {
+            fetch('/rpm')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('rpm-display').textContent = data.rpm;
+        });
+}
 
-        const centerX = joystick.offsetWidth / 2;
-        const centerY = joystick.offsetHeight / 2;
-
-        
-        
-        function showPopup(message) {
-            document.getElementById('modal-text').innerText = message + ' Information';
-            document.getElementById('myModal').style.display = "block";
-        }
+        // Call every 500 ms
+        setInterval(updateRPM, 100);
+                function showPopup(message) {
+                    document.getElementById('modal-text').innerText = message + ' Information';
+                    document.getElementById('myModal').style.display = "block";
+                }
 
         function updateData() {
             fetch('/update')
@@ -158,5 +159,77 @@
             document.getElementById('myModal').style.display = "none";
         }
     </script>
+    <script>
+    let knob = document.getElementById("joystickKnob");
+    let isDragging = false;
+    let lastAngle = null;
+    let totalRotation = 0;
+    let baseRPM = 4000;
+    let lastSent = 0;
+
+    function getAngle(e, element) {
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+    }
+
+    function updateKnobRotation(angle) {
+        knob.style.transform = `rotate(${angle}deg)`;
+    }
+
+    function sendRPMToServer(rpm) {
+        const now = Date.now();
+        if (now - lastSent > 100) {  // send every 100ms max
+            fetch('/joystick-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rpm })
+            });
+            lastSent = now;
+        }
+    }
+
+    knob.addEventListener("mousedown", startDrag);
+    knob.addEventListener("touchstart", startDrag);
+    document.addEventListener("mousemove", onDrag);
+    document.addEventListener("touchmove", onDrag);
+    document.addEventListener("mouseup", endDrag);
+    document.addEventListener("touchend", endDrag);
+
+    function startDrag(e) {
+        isDragging = true;
+        lastAngle = getAngle(e, knob);
+        e.preventDefault();
+    }
+
+    function onDrag(e) {
+        if (!isDragging) return;
+        const newAngle = getAngle(e, knob);
+        let delta = newAngle - lastAngle;
+
+        // Normalize to -180 to 180 range
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+
+        totalRotation += delta;
+        lastAngle = newAngle;
+
+        updateKnobRotation(totalRotation);
+
+        // Compute RPM
+        let rpm = Math.round(baseRPM + totalRotation * 5);
+        rpm = Math.max(0, Math.min(8000, rpm)); // Clamp to range
+
+        sendRPMToServer(rpm);
+    }
+
+    function endDrag(e) {
+        isDragging = false;
+    }
+</script>
+
 </body>
 </html>

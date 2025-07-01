@@ -9,8 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         .box {
-            width: 734px;
-            height: 605px;
+            width: 463px;
+            height: 280px;
             border: 3px solid navy;
             border-bottom: none;
             display: flex;
@@ -68,6 +68,19 @@
             cursor: pointer;
         }
 
+        table {
+            border-collapse: collapse;
+            width: 469px;
+            height: 67px;
+        }
+
+        td {
+            border: 3px solid navy; /* 3px */
+            padding: 5px; /* 15px */
+            text-align: left;
+            position: relative;
+            height: 40px; /* 120px */
+        }
     </style>
 </head>
 <body>
@@ -78,6 +91,8 @@
         </div>
         <div class="time" id="current-time"></div>
     </div>
+    <div style="position:absolute; top:0; left:0; width:800px; height:400px; background-color:rgba(255, 0, 0, 0.163); z-index:-1;"></div>
+
     <div class="content">
         <div class="container">
             <div class="box">

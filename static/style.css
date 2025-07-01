@@ -14,8 +14,8 @@ body {
     justify-content: space-between;
     padding: 5px 10px; /* spacing of lungs */
     align-items: center;
-    width: 600px; /* x-span of nav bar (ends at physical portion) */
-    height: 40px; 
+    width: 570px; /* x-span of nav bar (ends at physical portion) */
+    height: 35px; 
     top: 0;
     z-index: 1000;
     box-sizing: border-box;
@@ -43,7 +43,7 @@ body {
     top: 0;
     left: 0; /* -10px */
     width: 40px; /* 50px */
-    height: 40px; /* Relative to parent */
+    height: 35px; /* Relative to parent */
     background-color: rgb(199, 68, 68);
     z-index: -1; /* Place behind the icon */
 }
@@ -55,7 +55,7 @@ body {
     top: -8px; /* -10px */
     left: -15px; /* -15px */
     width: 2px; /* 2px */
-    height: 42px;
+    height: 35px;
     background-color: white;
     z-index: -1; /* Place behind the icon */
 }
@@ -66,7 +66,7 @@ body {
     top: -8px; /* -10px */
     right: -15px; /* -15px */
     width: 2px; /* 2px */
-    height: 42px;
+    height: 35px;
     background-color: rgb(255, 255, 255);
     z-index: -1; /* Place behind the icon */
 }
@@ -83,33 +83,30 @@ body {
     justify-content: flex-start;
     align-items: flex-start;
     flex-grow: 1;
-    padding: 20px; /* 20px */
+    padding: 5px; /* 20px */
     margin-top: 0.40px; /* 40px */
-    width: 500px;
+    width: 475px;
     box-sizing: border-box;
 }
 
 .container {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     position: relative;
 }
 
 table {
     border-collapse: collapse;
-    margin-bottom: 20px; /* 20px */
-    width: auto;
-    height: auto;
+    width: 470px;
+    height: 350px;
 }
 
 td {
     border: 3px solid navy; /* 3px */
-    padding: 15px; /* 15px */
+    padding: 5px; /* 15px */
     text-align: left;
     position: relative;
-    width: 100px; /* 100px */
-    height: 120px; /* 120px */
+    height: 40px; /* 120px */
 }
 
 .circled {
@@ -118,8 +115,8 @@ td {
     align-items: center;
     border: 3px solid navy; /* 3px */
     border-radius: 50px; /* 50px */
-    width: 130px; /* 130px */
-    height: 100px; /* 100px */
+    width: 75px; /* 130px */
+    height: 50px; /* 100px */
     position: absolute;
     top: 5px; /* 5px */
     left: 5px; /* 5px */
@@ -129,21 +126,23 @@ td {
     background-color: #ffffff;
     text-align: center;
     box-sizing: border-box;
-    font-size: 35px; /* 35px */
+    font-size: auto; /* 35px */
     font-weight: bold;
 }
 
 .variable {
-    font-size: 80px; /* 80px */
+    font-size: 30px; /* 80px */
     position: absolute;
     bottom: 5px; /* 5px */
     right: 5px; /* 5px */
     color: navy;
+    font-weight: bold;
+
 
 }
 
 .unit {
-    font-size: 30px;
+    font-size: 15px;
     position: absolute;
     top:5px;
     right: 5px;
@@ -167,7 +166,7 @@ button:hover {
 .side-buttons {
     position: absolute;
     top: 0;
-    left: calc(100% + 5px); /* 10px */
+    left: 475px; /* 10px */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -189,8 +188,8 @@ home and dash button on right side
     border-top: 0.1875rem solid navy; /* 3px */
     background-color: #ffffff;
     color: navy;
-    height: 80px;
-    width: 120px;
+    height: 70px;
+    width: 80px;
     font-size: 30px;
     font-weight: bold;
     margin: 0;
@@ -204,7 +203,7 @@ home and dash button on right side
 .last-row td {
     font-size: 30px;
     color: navy;
-    height:60px;
+    height: 10px;
     padding: 5px;
 }
 
@@ -214,8 +213,8 @@ home and dash button on right side
     align-items: center;
     border: 2px solid navy; /* 3px */
     border-radius: 40px;
-    height: 80px;
-    width: 120px;
+    height: 60px;
+    width: 80px;
     margin: 5px 0; /* 10px 0 */
     background-color: #ffffff;
     color: navy;
@@ -224,8 +223,8 @@ home and dash button on right side
 }
 
 .rect-button {
-    height: 90px;
-    width: 120px;
+    height: 60px;
+    width: 80px;
     border: 2px solid navy;
     background-color: #ffffff;
     color: navy;
@@ -286,13 +285,15 @@ home and dash button on right side
     cursor: pointer;
 }
 
-.circle-container{
-    position: relative;
-    bottom: 10px;
-    right:10px;
-    width: 120px;
-    height: 120px;      
+
+.circle-container {
+    position: fixed;
+    top: 230px;
+    left: 615px;
+    width: 150px;
+    height: 150px;
 }
+
 .circle {
     width: 100%;
     height: 100%;
@@ -318,11 +319,3 @@ home and dash button on right side
     transform: translateX(-50%);
 }
 
-
-.circle-container {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 150px;
-    height: 150px;
-}

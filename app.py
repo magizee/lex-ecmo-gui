@@ -346,5 +346,15 @@ def getRPM():
         rpm=rpm
         )
 
+@app.route('/joystick-data', methods=['POST'])
+def joystick_data():
+    global rpm
+    data = request.get_json()
+    if 'rpm' in data:
+        rpm = max(min(int(data['rpm']), rpmMax), rpmMin)  # clamp to safety bounds
+        print("Joystick RPM updated to:", rpm)
+    return '', 204
+
+
 if __name__ == '__main__':
     app.run(host= '0.0.0.0', port=9000, debug=False)
