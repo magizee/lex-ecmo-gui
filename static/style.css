@@ -55,7 +55,7 @@ body {
     left: 0; 
     width: 40px; 
     height: 35px; 
-    background-color: rgba(199, 68, 68, 0);
+    background-color: rgba(125, 68, 199, 0.412);
     z-index: 2; 
 }
 
