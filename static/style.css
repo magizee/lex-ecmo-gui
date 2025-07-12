@@ -41,11 +41,22 @@ body {
     content: '';
     position: fixed;
     top: 0;
-    left: 0; /* -10px */
-    width: 40px; /* 50px */
-    height: 35px; /* Relative to parent */
+    left: 0; 
+    width: 40px; 
+    height: 35px; 
     background-color: rgb(199, 68, 68);
-    z-index: -1; /* Place behind the icon */
+    z-index: -1; 
+}
+
+.exit-button{
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0; 
+    width: 40px; 
+    height: 35px; 
+    background-color: rgba(199, 68, 68, 0);
+    z-index: 2; 
 }
 
 /* Vertical white lines around the second icon */

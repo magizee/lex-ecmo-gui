@@ -12,8 +12,10 @@
 <body>
     <div class="nav">
         <div class="icons">
-            <span class="icon" onclick="exitBrowser()" style="cursor:pointer;"><i class="fa-solid fa-lungs"></i></span>
+            <span class="icon"><i class="fa-solid fa-lungs"></i></span>
             <span class="icon"><i class="fa-solid fa-lock"></i></span>
+            <button id="exit-button" onclick="exitApp()">Exit</button>
+
         </div>
         <div class="time" id="current-time"></div>
     </div>
@@ -228,15 +230,11 @@
         isDragging = false;
     }
 </script>
+
     <script>
-       function exitBrowser() {
-            if (confirm("Exit kiosk mode?")) {
-                fetch('/exit-browser')
-                    .then(response => response.text())
-                    .then(data => console.log(data));
-            }
+        function exitApp() {
+            fetch('/exit', { method: 'POST' });
         }
-        
     </script>
 
 </body>

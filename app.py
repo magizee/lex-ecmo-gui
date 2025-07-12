@@ -357,6 +357,7 @@ def joystick_data():
 
 @app.route('/exit-browser')
 def exit_browser():
+    import os
     os.system("pkill chromium-browser")
     return "Kiosk mode exited"
 
