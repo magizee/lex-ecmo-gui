@@ -84,12 +84,12 @@ body {
 
 
 .time {
-    font-family: 'Inter';
+    font-family: 'Nimbus Sans', sans-serif;
     font-size: 30px; /* 30px */
 }
 
 .content {
-    font-family: 'Inter';
+    font-family: 'Nimbus Sans', sans-serif;
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -314,7 +314,7 @@ home and dash button on right side
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: sans-serif;
+    font-family: 'Nimbus Sans', sans-serif;
     font-size: 16px;
     color: navy;
 }
