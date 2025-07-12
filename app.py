@@ -4,6 +4,8 @@ import json
 from flask_wtf import FlaskForm
 from wtforms import DecimalRangeField
 import time
+import subprocess
+
 
 # Initialize flask app
 app = Flask(__name__)
@@ -355,11 +357,14 @@ def joystick_data():
         print("Joystick RPM updated to:", rpm)
     return '', 204
 
-@app.route('/exit-browser')
-def exit_browser():
-    import os
-    os.system("pkill chromium-browser")
-    return "Kiosk mode exited"
+@app.route('/exit', methods=['POST'])
+def exit_app():
+    # Kill Chromium processes (kiosk)
+    subprocess.call(["pkill", "chromium"])
+    # Optional: shut down the Flask server too
+    # os.kill(os.getpid(), signal.SIGTERM)
+    return '', 204
+
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0', port=9000, debug=False)
