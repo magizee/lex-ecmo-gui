@@ -361,7 +361,7 @@ def joystick_data():
 @app.route('/exit', methods=['POST'])
 def exit():
     # Kill Chromium processes (kiosk)
-    os.system("kill chromium")    
+    os.system("sudo pkill -f chromium")    
     # Optional: shut down the Flask server too
     # os.kill(os.getpid(), signal.SIGTERM)
     return '', 204
