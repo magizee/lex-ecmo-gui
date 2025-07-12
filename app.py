@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import DecimalRangeField
 import time
 import subprocess
+import os
 
 
 # Initialize flask app
@@ -358,9 +359,9 @@ def joystick_data():
     return '', 204
 
 @app.route('/exit', methods=['POST'])
-def exit_app():
+def exit():
     # Kill Chromium processes (kiosk)
-    subprocess.call(["pkill", "chromium"])
+    os.system("kill chromium")    
     # Optional: shut down the Flask server too
     # os.kill(os.getpid(), signal.SIGTERM)
     return '', 204
