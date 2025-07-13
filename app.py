@@ -358,14 +358,18 @@ def joystick_data():
         print("Joystick RPM updated to:", rpm)
     return '', 204
 
+
 @app.route('/exit', methods=['POST'])
 def exit():
-    # Kill Chromium processes (kiosk)
-    os.system("sudo pkill -f chromium")    
-    # Optional: shut down the Flask server too
-    # os.kill(os.getpid(), signal.SIGTERM)
+    result = subprocess.run(
+        ["sudo", "pkill", "-f", "chromium"],
+        capture_output=True,
+        text=True
+    )
+    print("RETURN CODE:", result.returncode)
+    print("STDOUT:", result.stdout)
+    print("STDERR:", result.stderr)
     return '', 204
-
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0', port=9000, debug=False)
