@@ -8,6 +8,56 @@ import time
 import subprocess
 import os
 
+import os, json, time, tempfile, shutil
+from pathlib import Path
+
+EXAMPLES_PATH = Path(__file__).with_name("examples.json")
+
+EXAMPLE_FIELDS = [
+    # name -> numeric type
+    ("flow_rate", float),
+    ("p_ven",     float),
+    ("p_int",     float),
+    ("p_art",     float),
+    ("t_art",     float),
+    ("svo2",      float),
+    ("delta_p",   float),
+    ("rpm",       int),   # optional, but nice to have
+]
+
+def _to_num(v, caster, default=None):
+    try:
+        return caster(v)
+    except (TypeError, ValueError):
+        return default
+
+def load_examples():
+    if not EXAMPLES_PATH.exists():
+        return []
+    try:
+        with EXAMPLES_PATH.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+def _atomic_write_json(path: Path, payload):
+    tmp = Path(tempfile.mkstemp(prefix="examples_", suffix=".json")[1])
+    try:
+        with tmp.open("w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+        shutil.move(str(tmp), str(path))
+    finally:
+        try:
+            if tmp.exists():
+                tmp.unlink()
+        except Exception:
+            pass
+
+def save_examples(examples_list):
+    _atomic_write_json(EXAMPLES_PATH, examples_list)
+
+
 
 # Initialize flask app
 app = Flask(__name__)
@@ -103,71 +153,68 @@ ALERT_MESSAGE = {
 
 def initValues():
     global data
-    data = [round((FLOW_RATE_MAX + FLOW_RATE_MIN) / 2, 2), #flow
-        round((P_VEN_MAX + P_VEN_MIN) / 2, 2), #p_ven
-        round((P_INT_MAX + P_INT_MIN) / 2, 2), #p_int
-        round((DELTA_P_MAX + DELTA_P_MIN) / 2, 2) , #deltap
-        0, #rpm
-        round((P_ART_MAX + P_ART_MIN) / 2, 2),    #p_art
-        round((T_ART_MAX + T_ART_MIN) / 2, 2), #t_art
-        round((SVO2_MAX + SVO2_MIN) / 2, 2) #svo2
-    ]
+    data = {
+        "flow_rate": round((FLOW_RATE_MAX + FLOW_RATE_MIN) / 2, 2),
+        "p_ven":     round((P_VEN_MAX   + P_VEN_MIN)   / 2, 2),
+        "p_int":     round((P_INT_MAX   + P_INT_MIN)   / 2, 2),
+        "delta_p":   round((DELTA_P_MAX + DELTA_P_MIN) / 2, 2),
+        "rpm":       0,
+        "p_art":     round((P_ART_MAX   + P_ART_MIN)   / 2, 2),
+        "t_art":     round((T_ART_MAX   + T_ART_MIN)   / 2, 2),
+        "svo2":      round((SVO2_MAX    + SVO2_MIN)    / 2, 2),
+    }
 
 @app.route('/admin/setPresets')
 def setPresets():
     return render_template('setPresets.html')
 
-def to_float(x): 
-    try: return float(x)
-    except (TypeError, ValueError): return None
+def _to_float(v, default=None):
+    try: return float(v)
+    except (TypeError, ValueError): return default
 
-#only place to change max/min
 @app.route('/admin/setPresets/send', methods=['POST'])
 def setPresetsSend():
-    global FLOW_RATE_MAX
-    global FLOW_RATE_MIN
-    global P_VEN_MAX
-    global P_VEN_MIN
-    global P_INT_MAX
-    global P_INT_MIN
-    global P_ART_MAX
-    global P_ART_MIN
-    global T_ART_MAX
-    global T_ART_MIN
-    global SVO2_MAX
-    global SVO2_MIN
-    global DELTA_P_MAX
-    global DELTA_P_MIN
-    if(request.form['VHigh'] != ""):
-        FLOW_RATE_MAX = (request.form['VHigh'])
-    if(request.form['VLow'] != ""):
-        FLOW_RATE_MIN = (request.form['VLow'])
-    if(request.form['PvenHigh'] != ""):
-        P_VEN_MAX = (request.form['PvenHigh'])
-    if(request.form['PvenLow'] != ""):
-        P_VEN_MIN = (request.form['PvenLow'])
-    if(request.form['PintHigh'] != ""):
-        P_INT_MAX = (request.form['PintHigh'])
-    if(request.form['PintLow'] != ""):
-        P_INT_MIN = (request.form['PintLow'])
-    if(request.form['PartHigh'] != ""):
-        P_ART_MAX = (request.form['PartHigh'])
-    if(request.form['PartLow'] != ""):
-        P_ART_MIN = (request.form['PartLow'])
-    if(request.form['TartHigh'] != ""):
-        T_ART_MAX = (request.form['TartHigh'])
-    if(request.form['TartLow'] != ""):
-        T_ART_MIN = (request.form['TartLow'])
-    if(request.form['SvO2High'] != ""):
-        SVO2_MAX = (request.form['SvO2High'])
-    if(request.form['SvO2Low'] != ""):
-        SVO2_MIN = (request.form['SvO2Low'])
-    if(request.form['DeltaPHigh'] != ""):
-        DELTA_P_MAX = (request.form['DeltaPHigh'])
-    if(request.form['DeltaPLow'] != ""):
-        DELTA_P_MIN = (request.form['DeltaPLow'])
+    global FLOW_RATE_MAX, FLOW_RATE_MIN, P_VEN_MAX, P_VEN_MIN, P_INT_MAX, P_INT_MIN
+    global P_ART_MAX, P_ART_MIN, T_ART_MAX, T_ART_MIN, SVO2_MAX, SVO2_MIN, DELTA_P_MAX, DELTA_P_MIN
+
+    VHigh = _to_float(request.form.get('VHigh'), FLOW_RATE_MAX)
+    VLow  = _to_float(request.form.get('VLow'),  FLOW_RATE_MIN)
+    if VHigh is not None: FLOW_RATE_MAX = VHigh
+    if VLow  is not None: FLOW_RATE_MIN = VLow
+
+    PvenHigh = _to_float(request.form.get('PvenHigh'), P_VEN_MAX)
+    PvenLow  = _to_float(request.form.get('PvenLow'),  P_VEN_MIN)
+    if PvenHigh is not None: P_VEN_MAX = PvenHigh
+    if PvenLow  is not None: P_VEN_MIN = PvenLow
+
+    PintHigh = _to_float(request.form.get('PintHigh'), P_INT_MAX)
+    PintLow  = _to_float(request.form.get('PintLow'),  P_INT_MIN)
+    if PintHigh is not None: P_INT_MAX = PintHigh
+    if PintLow  is not None: P_INT_MIN = PintLow
+
+    PartHigh = _to_float(request.form.get('PartHigh'), P_ART_MAX)
+    PartLow  = _to_float(request.form.get('PartLow'),  P_ART_MIN)
+    if PartHigh is not None: P_ART_MAX = PartHigh
+    if PartLow  is not None: P_ART_MIN = PartLow
+
+    TartHigh = _to_float(request.form.get('TartHigh'), T_ART_MAX)
+    TartLow  = _to_float(request.form.get('TartLow'),  T_ART_MIN)
+    if TartHigh is not None: T_ART_MAX = TartHigh
+    if TartLow  is not None: T_ART_MIN = TartLow
+
+    SvO2High = _to_float(request.form.get('SvO2High'), SVO2_MAX)
+    SvO2Low  = _to_float(request.form.get('SvO2Low'),  SVO2_MIN)
+    if SvO2High is not None: SVO2_MAX = SvO2High
+    if SvO2Low  is not None: SVO2_MIN = SvO2Low
+
+    DeltaPHigh = _to_float(request.form.get('DeltaPHigh'), DELTA_P_MAX)
+    DeltaPLow  = _to_float(request.form.get('DeltaPLow'),  DELTA_P_MIN)
+    if DeltaPHigh is not None: DELTA_P_MAX = DeltaPHigh
+    if DeltaPLow  is not None: DELTA_P_MIN = DeltaPLow
+
     initValues()
     return redirect('/admin')
+
 
 @app.route('/admin/loading/<scen>', methods=['POST'])
 def exampleScenario1Loading(scen):
@@ -200,15 +247,15 @@ def exampleScenario1(timer):
 @app.route('/admin/sliders', methods=['POST'])
 def sliders():
     global data
-    print(request.form)
-    data["flow_rate"] = to_float(request.form['VS'])
-    data["p_ven"] = to_float(request.form['PvenS'])
-    data["p_int"] = to_float(request.form['PintS'])
-    data["delta_p"] = to_float(request.form['DeltaPS'])
-    data["p_art"] = to_float(request.form['PartS'])
-    data["t_art"] = to_float(request.form['TartS'])
-    data["svo2"] = to_float(request.form['SvO2S'])
+    data["flow_rate"] = _to_float(request.form.get('VS'),      data["flow_rate"])
+    data["p_ven"]     = _to_float(request.form.get('PvenS'),   data["p_ven"])
+    data["p_int"]     = _to_float(request.form.get('PintS'),   data["p_int"])
+    data["delta_p"]   = _to_float(request.form.get('DeltaPS'), data["delta_p"])
+    data["p_art"]     = _to_float(request.form.get('PartS'),   data["p_art"])
+    data["t_art"]     = _to_float(request.form.get('TartS'),   data["t_art"])
+    data["svo2"]      = _to_float(request.form.get('SvO2S'),   data["svo2"])
     return redirect('/admin')
+
     
 @app.route('/admin')
 def controlPanel():
@@ -243,17 +290,19 @@ def home():
 
 @app.route('/dashboard')
 def dashboard():
+    global data
     safety_status = {}
     first_yellow_msg = None
     first_red_msg = None
 
+    #alert logic
     for key in data.keys():
         if key == "rpm":
             continue
         sev, direction = check_safety(data[key], YELLOW_ALARM[key], RED_ALARM[key])
-        safety_status[key] = sev  # keep exactly as your JS expects
+        safety_status[key] = sev  
 
-        if sev > 0:  # only build a message when in alarm
+        if sev > 0:  
             msg = ALERT_MESSAGE.get(key, {}).get(direction, {}).get(sev)
             if sev == 2 and first_red_msg is None:
                 first_red_msg = msg
@@ -266,29 +315,26 @@ def dashboard():
 
 @app.route('/update')
 def update():
+    """
+    Updates values
+    Finds safety status for all entries
+    Determines alert severity
+    Returns everything as a json
+    Called once a second
+    """
     # Update example values (in a real application, these would be fetched from sensors or a database)
-    """
-    global flow_rate, p_ven, p_int, p_art, t_art, svo2, delta_p, rpm
-    flow_rate = round(random.uniform(2.0, 3.0), 2)
-    p_ven = random.randint(-15, 15)
-    p_int = random.randint(140, 210)
-    p_art = random.randint(90, 190)
-    t_art = round(random.uniform(34.0, 41.0), 1)
-    svo2 = round(random.uniform(65.0, 95.0), 1)
-    delta_p = random.randint(0, 20)
-    rpm = random.randint(3500, 4500)
-    """
     safety_status = {}
     first_yellow_msg = None
     first_red_msg = None
 
+    #alert logic
     for key in data.keys():
         if key == "rpm":
             continue
         sev, direction = check_safety(data[key], YELLOW_ALARM[key], RED_ALARM[key])
-        safety_status[key] = sev  # keep exactly as your JS expects
+        safety_status[key] = sev  
 
-        if sev > 0:  # only build a message when in alarm
+        if sev > 0: 
             msg = ALERT_MESSAGE.get(key, {}).get(direction, {}).get(sev)
             if sev == 2 and first_red_msg is None:
                 first_red_msg = msg
@@ -312,6 +358,9 @@ def update():
 
 @app.route('/rpm')
 def getRPM():
+    """
+    Returns rpm every 100ms
+    """
     global data
     return jsonify(
         rpm=data["rpm"]
@@ -320,11 +369,17 @@ def getRPM():
 @app.route('/joystick-data', methods=['POST'])
 def joystick_data():
     global data
-    json_data = request.get_json()
-    if 'rpm' in data:
-        data["rpm"] = max(min(int(json_data['rpm']), RPM_MAX), RPM_MIN)  # clamp to safety bounds
-        print("Joystick RPM updated to:", data["rpm"])
+    json_data = request.get_json(silent=True) or {}
+    rpm_raw = json_data.get('rpm')
+    try:
+        rpm_val = int(rpm_raw)
+    except (TypeError, ValueError):
+        return '', 400  # bad payload
+
+    data["rpm"] = max(min(rpm_val, RPM_MAX), RPM_MIN)  # clamp
+    print("Joystick RPM updated to:", data["rpm"])
     return '', 204
+
 
 
 @app.route('/exit', methods=['POST'])
@@ -338,6 +393,9 @@ def exit():
     print("STDOUT:", result.stdout)
     print("STDERR:", result.stderr)
     return '', 204
+    
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0', port=9000, debug=False)
+
+
