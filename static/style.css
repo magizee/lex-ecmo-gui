@@ -20,12 +20,35 @@ body {
     z-index: 1000;
     box-sizing: border-box;
     position: relative;
-
 }
+
+.nav{ transition: background-color .15s ease, color .15s ease; }
+.nav.status-0{ background: navy;}           /* safe green */
+.nav.status-1{ background:#ffd400; }           /* yellow */
+.nav.status-2{ background:#e03131;} 
+
+
+
+.alert-text{
+  flex: 0 0 var(--alert-slot);  /* fixed width slot */
+  max-width: var(--alert-slot);
+  font-weight: 100;
+  font-family: 'Nimbus Sans', sans-serif;
+  margin: 10px; /* change this*/
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root{
+  --alert-slot: 250px;   /* fixed space reserved for the alert text */
+  --icon-gap: 8px;       /* small gap between items */
+}
+
 
 .icons {
     display: flex;
-    gap: 250px; /* 600px */
+    gap: var(--icon-gap); /* 600px */
     position: relative;
 
 }
@@ -34,6 +57,7 @@ body {
     font-size: 18px; /* 18px */
     cursor: pointer;
     position: relative;
+    top: 10px
 
 }
 
@@ -59,8 +83,12 @@ body {
     z-index: 2; 
 }
 
+.icons .icon:nth-of-type(2) {
+  margin-left: 100px;  /* increase this value to move it further */
+}
+
 /* Vertical white lines around the second icon */
-.icon:nth-child(2)::before {
+.icon:nth-child(3)::before {
     content: '';
     position: absolute;
     top: -8px; /* -10px */
@@ -68,10 +96,9 @@ body {
     width: 2px; /* 2px */
     height: 35px;
     background-color: white;
-    z-index: -1; /* Place behind the icon */
 }
 
-.icon:nth-child(2)::after {
+.icon:nth-child(3)::after {
     content: '';
     position: absolute;
     top: -8px; /* -10px */
@@ -79,14 +106,54 @@ body {
     width: 2px; /* 2px */
     height: 35px;
     background-color: rgb(255, 255, 255);
-    z-index: -1; /* Place behind the icon */
 }
 
 
 .time {
     font-family: 'Nimbus Sans', sans-serif;
-    font-size: 30px; /* 30px */
+    font-size: 20px; /* 30px */
 }
+
+/* Pick your inks once */
+:root{
+  --ink-navy: navy;
+  --ink-white: #ffffff;
+}
+
+/* Default foreground (status-0 = navy background) */
+.nav{ color: var(--ink-white); }
+
+/* Only change the BACKGROUND here */
+.nav.status-0{ background-color: navy;    }
+.nav.status-1{ background-color: #ffd400; }
+.nav.status-2{ background-color: #e03131; }
+
+/* Set the foreground “ink” per status */
+.nav.status-0{ --nav-ink: var(--ink-white); }
+.nav.status-1{ --nav-ink: var(--ink-navy);  }  /* yellow -> navy text/icons/time */
+.nav.status-2{ --nav-ink: var(--ink-white); }  /* red -> white text/icons/time */
+
+/* Apply that ink to everything inside the nav */
+.nav,
+.nav .icon, .nav .icon i,
+.nav .alert-text,
+.nav .time,
+.nav button, .nav button *,
+.nav a {
+  color: var(--nav-ink) !important;
+}
+
+/* Your vertical bars around the 2nd icon should match the ink too */
+.nav .icon:nth-child(3)::before,
+.nav .icon:nth-child(3)::after{
+  background-color: var(--nav-ink) !important;
+}
+
+.nav .icons .icon:first-child i {
+    color: white !important
+} 
+
+
 
 .content {
     font-family: 'Nimbus Sans', sans-serif;
@@ -139,7 +206,38 @@ td {
     box-sizing: border-box;
     font-size: auto; /* 35px */
     font-weight: bold;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+
 }
+.circled,
+.circled.status-0,
+.circled.status-1,
+.circled.status-2 {
+  color: #0b3b6b !important;   /* navy */
+  border-color: #0b3b6b;       /* navy ring to match text */
+}
+
+/* 0 = safe (white), 1 = yellow, 2 = red */
+.circled.status-0{
+  background: #ffffff;
+}
+.circled.status-1{
+  background: #ffd400;         /* yellow */
+}
+.circled.status-2{
+  background: #e03131;         /* red */
+}
+.circled > span { color: inherit !important; line-height: 1; }
+
+
+.variable{ transition: color .15s ease; }
+.variable.status-0{ color: navy; }
+.variable.status-1{ color: #ffd400; }   /* dark yellow for readability */
+.variable.status-2{ color: #c92a2a; } 
+
+/* (Optional) ensure the symbol stays centered */
+.circled > span{ line-height: 1; }
+
 
 .variable {
     font-size: 30px; /* 80px */
@@ -245,13 +343,10 @@ home and dash button on right side
     top: calc(100%); /* Move down by the height of the table row plus margin */
 }
 
-.safe {
-    background-color: #ffffff;
-}
-
-.unsafe {
-    background-color: #fffc39;
-}
+/* 0 = safe (green), 1 = yellow (warn), 2 = red (critical) */
+.status-0 { color:#ffffff}
+.status-1 { color:#f7b500}
+.status-2 { color:#e03131}
 
 
 .disabled i {
@@ -330,3 +425,110 @@ home and dash button on right side
     transform: translateX(-50%);
 }
 
+/* === NAV FLASH — FINAL CLEAN VERSION (put at very end of CSS) === */
+
+/* Host vars + stacking context */
+.nav {
+  position: relative;
+  isolation: isolate;
+  --bg: navy;      /* animated below */
+  --fg: white;     /* animated below */
+  color: var(--fg);
+  background: transparent !important;  /* bg painted by ::before */
+}
+
+/* Background layer reads --bg */
+.nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;              /* behind content */
+  pointer-events: none;
+  background: var(--bg);
+}
+
+/* Keep nav contents above bg */
+.nav > * { position: relative; z-index: 1; }
+
+/* Make only real text/icon nodes follow the animated color */
+.nav .icons .icon,
+.nav .icons .icon *,
+.nav .time,
+.nav .label {
+  color: var(--fg) !important;
+}
+
+/* Font Awesome / SVG compatibility */
+.nav .icons .icon svg,
+.nav .icons .icon svg * {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+/* For FA duotone */
+.nav .icons .icon {
+  --fa-primary-color: currentColor;
+  --fa-secondary-color: currentColor;
+}
+/* For FA font-based <i> */
+.nav .icons .icon i::before {
+  color: currentColor !important;
+}
+
+/* Divider bars around the 3rd icon should track current text color */
+.nav .icons .icon:nth-child(3) { position: relative; }
+.nav .icons .icon:nth-child(3)::before,
+.nav .icons .icon:nth-child(3)::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  width: 2px;
+  height: 35px;
+  background-color: currentColor !important; /* key: follows var(--fg) */
+}
+.nav .icons .icon:nth-child(3)::before { left: -15px; }
+.nav .icons .icon:nth-child(3)::after  { right: -15px; }
+
+/* === EXCEPTION: FIRST ICON ALWAYS WHITE (place AFTER the rules above) === */
+.nav .icons .icon:first-child,
+.nav .icons .icon:first-child *,
+.nav .icons .icon:first-child::before,
+.nav .icons .icon:first-child::after,
+.nav .icons .icon:first-child a,
+.nav .icons .icon:first-child a * {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important; /* webkit glyphs */
+  fill: #fff !important;
+  stroke: #fff !important;
+}
+
+/* === STATUS HOOKS (animate the custom properties) === */
+.nav.status-1 {
+  animation: pulse-yellow 1.1s steps(2, start) infinite !important;
+}
+.nav.status-2 {
+  animation: flash-navy-red 0.6s steps(2, start) infinite !important;
+}
+
+/* Hard-step keyframes: flip both bg and fg together */
+@keyframes pulse-yellow {
+  0%, 49.9%  { --bg: #ffd400; --fg: navy; }
+  50%, 100%  { --bg: navy;    --fg: white; }
+}
+@keyframes flash-navy-red {
+  0%, 49.9%  { --bg: #e03131; --fg: white; }
+  50%, 100%  { --bg: navy;    --fg: white; }
+}
+
+/* Make the alert text follow the animated foreground color */
+.nav #alert-text,
+.nav .alert-text {
+  color: var(--fg) !important;
+  -webkit-text-fill-color: var(--fg) !important; /* WebKit glyphs */
+  text-decoration-color: var(--fg) !important;   /* if you ever underline it */
+}
+
+/* If the alert contains links, force all link states too */
+.nav #alert-text a {
+  color: var(--fg) !important;
+  text-decoration-color: var(--fg) !important;
+}

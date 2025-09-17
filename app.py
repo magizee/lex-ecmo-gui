@@ -1,3 +1,4 @@
+# Import Modules
 from flask import Flask, redirect, render_template, jsonify, request
 import random
 import json
@@ -11,194 +12,163 @@ import os
 # Initialize flask app
 app = Flask(__name__)
 
-# Define your safety range limits
-safety_ranges = {
-    'flow_rate': (2.0, 3.0),
-    'p_ven': (-10, 10),
-    'p_int': (150, 200),
-    'p_art': (100, 180),
-    't_art': (35, 40),
-    'svo2': (70, 90),
-    'delta_p': (5, 15),
+
+# Constants
+FLOW_RATE_MAX = 20.0
+FLOW_RATE_MIN = 0.0
+
+P_VEN_MAX = 0.0
+P_VEN_MIN = -100.0
+
+P_ART_MAX = 500.0
+P_ART_MIN = 0.0
+
+P_INT_MAX = 500.0
+P_INT_MIN = 0.0
+
+T_ART_MAX = 45.0
+T_ART_MIN = 30.0
+
+DELTA_P_MAX = 60.0
+DELTA_P_MIN = 0.0
+
+SVO2_MAX = 100.0
+SVO2_MIN = 30.0
+
+RPM_MIN = 0
+RPM_MAX = 30000
+# Data Array
+data = {"flow_rate": round((FLOW_RATE_MAX + FLOW_RATE_MIN) / 2, 2), #flow
+        "p_ven": round((P_VEN_MAX + P_VEN_MIN) / 2, 2), #p_ven
+        "p_int": round((P_INT_MAX + P_INT_MIN) / 2, 2), #p_int
+        "delta_p": round((DELTA_P_MAX + DELTA_P_MIN) / 2, 2) , #deltap
+        "rpm": 0, #rpm
+        "p_art": round((P_ART_MAX + P_ART_MIN) / 2, 2),    #p_art
+        "t_art": round((T_ART_MAX + T_ART_MIN) / 2, 2), #t_art
+        "svo2": round((SVO2_MAX + SVO2_MIN) / 2, 2) #svo2
 }
 
-# Example values
-flow_rate = 0
-flow_rateMax = 100
-flow_rateMin = 0
+# Alarm ranges
+YELLOW_ALARM = {
+    "flow_rate": [2, 6], # Flow
+    "p_ven": [-40, -10], #Pven
+    "p_int": [60, 250], #Pint
+    "p_art": [80, 300], #Part
+    "delta_p": [0, 40], #Delta_P
+    "t_art": [34.0, 38.5], #Tart
+    "svo2": [60, 85] #SVO2
+}
 
-p_ven = -11
-p_venMax = 100
-p_venMin = 0
+RED_ALARM = {
+    "flow_rate": [1, 7.5], # Flow
+    "p_ven": [-80, 5], #Pven
+    "p_int": [30, 3000], #Pint
+    "p_art": [50, 350], #Part
+    "delta_p": [-5, 60], #Delta_P
+    "t_art": [32.0, 39.5], #Tart
+    "svo2": [50, 90] #SVO2
+}
 
-p_int = 191
-p_intMax = 100
-p_intMin = 0
 
-p_art = 180
-p_artMax = 100
-p_artMin = 0
+ALERT_MESSAGE = {
+    "flow_rate": {
+        "low": {1: "low ECMO flow", 2: "negative flow detected"},
+        "high": {1: "high ECMO flow", 2: "excessive flow"}
+    },
+    "p_ven": {
+        "low": {1: "p_ven magnitude high", 2: "p_ven magnitude very high"},
+        "high": {1: "p_ven magnitude low", 2: "p_ven magnitude very low"}
+    },
+    "p_int": {
+        "low": {1: "p_int low", 2: "p_int very low"},
+        "high": {1: "p_int high", 2: "p_int very high"}
+    },
+    "p_art": {
+        "low": {1: "p_art low", 2: "p_art very low"},
+        "high": {1: "p_art high", 2: "p_art very high"}
+    },
+    "delta_p": {
+        "low": {1: "delta_p low", 2: "delta_p very low"},
+        "high": {1: "delta_p high", 2: "delta_p very high"}
+    },
+    "t_art": {
+        "low": {1: "t_art low", 2: "t_art very low"},
+        "high": {1: "t_art high", 2: "t_art very high"}
+    },
+    "svo2": {
+        "low": {1: "svo2 low", 2: "svo2 very low"},
+        "high": {1: "svo2 high", 2: "svo2 very high"}
+    }
+}
 
-t_art = 37.6
-t_artMax = 100
-t_artMin = 0
-
-svo2 = 83.0
-svo2Max = 100
-svo2Min = 0
-
-delta_p = 11
-delta_pMax = 100
-delta_pMin = 0
-
-rpm = 4000
-rpmMax = 8000
-rpmMin = 0
-
-flow_rate = (flow_rateMax + flow_rateMin)/2
-p_ven = (p_venMax + p_venMin)/2
-p_int = (p_intMax + p_intMin)/2
-p_art = (p_artMax + p_artMin)/2
-t_art = (t_artMax + t_artMin)/2
-svo2 = (svo2Max + svo2Min)/2
-delta_p = (delta_pMax + delta_pMin)/2
-rpm = rpmMin
-
-# Back end code
 def initValues():
-    global flow_rate
-    global flow_rateMax
-    global flow_rateMin
-    global p_ven
-    global p_venMax
-    global p_venMin
-    global p_int
-    global p_intMax
-    global p_intMin
-    global p_art
-    global p_artMax
-    global p_artMin
-    global t_art
-    global t_artMax
-    global t_artMin
-    global svo2
-    global svo2Max
-    global svo2Min
-    global delta_p
-    global delta_pMax
-    global delta_pMin
-    global rpm
-    global rpmMax
-    global rpmMin
-    
-    flow_rate = (flow_rateMax + flow_rateMin)/2
-    p_ven = (p_venMax + p_venMin)/2
-    p_int = (p_intMax + p_intMin)/2
-    p_art = (p_artMax + p_artMin)/2
-    t_art = (t_artMax + t_artMin)/2
-    svo2 = (svo2Max + svo2Min)/2
-    delta_p = (delta_pMax + delta_pMin)/2
-    rpm = rpmMin
-    
-def cleanValues():
-    global flow_rate
-    global flow_rateMax
-    global flow_rateMin
-    global p_ven
-    global p_venMax
-    global p_venMin
-    global p_int
-    global p_intMax
-    global p_intMin
-    global p_art
-    global p_artMax
-    global p_artMin
-    global t_art
-    global t_artMax
-    global t_artMin
-    global svo2
-    global svo2Max
-    global svo2Min
-    global delta_p
-    global delta_pMax
-    global delta_pMin
-    global rpm
-    global rpmMax
-    global rpmMin
-    flow_rate = round(float(flow_rate),2)
-    flow_rateMax = round(float(flow_rateMax),2)
-    flow_rateMin = round(float(flow_rateMin),2)
-    p_ven = round(float(p_ven),2)
-    p_venMax = round(float(p_venMax),2)
-    p_venMin = round(float(p_venMin),2)
-    p_int = round(float(p_int),2)
-    p_intMax = round(float(p_intMax),2)
-    p_intMin = round(float(p_intMin),2)
-    p_art = round(float(p_art),2)
-    p_artMax = round(float(p_artMax),2)
-    p_artMin = round(float(p_artMin),2)
-    t_art = round(float(t_art),2)
-    t_artMax = round(float(t_artMax),2)
-    t_artMin = round(float(t_artMin),2)
-    svo2 = round(float(svo2),2)
-    svo2Max = round(float(svo2Max),2)
-    svo2Min = round(float(svo2Min),2)
-    delta_p = round(float(delta_p),2)
-    delta_pMax = round(float(delta_pMax),2)
-    delta_pMin = round(float(delta_pMin),2)
-    rpm = int(rpm)
-    rpmMax = int(rpmMax)
-    rpmMin = int(rpmMin)
+    global data
+    data = [round((FLOW_RATE_MAX + FLOW_RATE_MIN) / 2, 2), #flow
+        round((P_VEN_MAX + P_VEN_MIN) / 2, 2), #p_ven
+        round((P_INT_MAX + P_INT_MIN) / 2, 2), #p_int
+        round((DELTA_P_MAX + DELTA_P_MIN) / 2, 2) , #deltap
+        0, #rpm
+        round((P_ART_MAX + P_ART_MIN) / 2, 2),    #p_art
+        round((T_ART_MAX + T_ART_MIN) / 2, 2), #t_art
+        round((SVO2_MAX + SVO2_MIN) / 2, 2) #svo2
+    ]
+
 @app.route('/admin/setPresets')
 def setPresets():
     return render_template('setPresets.html')
+
+def to_float(x): 
+    try: return float(x)
+    except (TypeError, ValueError): return None
+
+#only place to change max/min
 @app.route('/admin/setPresets/send', methods=['POST'])
 def setPresetsSend():
-    global flow_rateMax
-    global flow_rateMin
-    global p_venMax
-    global p_venMin
-    global p_intMax
-    global p_intMin
-    global p_artMax
-    global p_artMin
-    global t_artMax
-    global t_artMin
-    global svo2Max
-    global svo2Min
-    global delta_pMax
-    global delta_pMin
+    global FLOW_RATE_MAX
+    global FLOW_RATE_MIN
+    global P_VEN_MAX
+    global P_VEN_MIN
+    global P_INT_MAX
+    global P_INT_MIN
+    global P_ART_MAX
+    global P_ART_MIN
+    global T_ART_MAX
+    global T_ART_MIN
+    global SVO2_MAX
+    global SVO2_MIN
+    global DELTA_P_MAX
+    global DELTA_P_MIN
     if(request.form['VHigh'] != ""):
-        flow_rateMax = request.form['VHigh']
+        FLOW_RATE_MAX = (request.form['VHigh'])
     if(request.form['VLow'] != ""):
-        flow_rateMin = request.form['VLow']
+        FLOW_RATE_MIN = (request.form['VLow'])
     if(request.form['PvenHigh'] != ""):
-        p_venMax = request.form['PvenHigh']
+        P_VEN_MAX = (request.form['PvenHigh'])
     if(request.form['PvenLow'] != ""):
-        p_venMin = request.form['PvenLow']
+        P_VEN_MIN = (request.form['PvenLow'])
     if(request.form['PintHigh'] != ""):
-        p_intMax = request.form['PintHigh']
+        P_INT_MAX = (request.form['PintHigh'])
     if(request.form['PintLow'] != ""):
-        p_intMin = request.form['PintLow']
+        P_INT_MIN = (request.form['PintLow'])
     if(request.form['PartHigh'] != ""):
-        p_artMax = request.form['PartHigh']
+        P_ART_MAX = (request.form['PartHigh'])
     if(request.form['PartLow'] != ""):
-        p_artMin = request.form['PartLow']
+        P_ART_MIN = (request.form['PartLow'])
     if(request.form['TartHigh'] != ""):
-        t_artMax = request.form['TartHigh']
+        T_ART_MAX = (request.form['TartHigh'])
     if(request.form['TartLow'] != ""):
-        t_artMin = request.form['TartLow']
+        T_ART_MIN = (request.form['TartLow'])
     if(request.form['SvO2High'] != ""):
-        svo2Max = request.form['SvO2High']
+        SVO2_MAX = (request.form['SvO2High'])
     if(request.form['SvO2Low'] != ""):
-        svo2Min = request.form['SvO2Low']
+        SVO2_MIN = (request.form['SvO2Low'])
     if(request.form['DeltaPHigh'] != ""):
-        delta_pMax = request.form['DeltaPHigh']
+        DELTA_P_MAX = (request.form['DeltaPHigh'])
     if(request.form['DeltaPLow'] != ""):
-        delta_pMin = request.form['DeltaPLow']
-    cleanValues()
+        DELTA_P_MIN = (request.form['DeltaPLow'])
     initValues()
     return redirect('/admin')
+
 @app.route('/admin/loading/<scen>', methods=['POST'])
 def exampleScenario1Loading(scen):
     timer = request.form['example1Length']
@@ -209,77 +179,40 @@ def exampleScenario1Loading(scen):
 
 @app.route('/admin/exampleScenario1/<timer>', methods=['GET'])
 def exampleScenario1(timer):
-    cleanValues()
+    global data
     if timer.isdigit() == False:
         return redirect('/admin')
-    global flow_rate
-    global p_ven
-    global svo2
     timer = int(timer)
-    Vstatic = flow_rate
-    PvenStatic = p_ven
-    SvO2Static = svo2
+    Vstatic = data["flow_rate"]
+    PvenStatic = data["p_ven"]
+    SvO2Static = data["t_art"]
     startTime = time.time()
     currentTimer = int(time.time() - startTime)
     print(Vstatic)
     while (currentTimer) <= timer:
-        flow_rate = round(Vstatic + (currentTimer/timer) * (65-Vstatic),2)
-        p_ven = round(PvenStatic + (currentTimer/timer) * (75-PvenStatic),2)
-        svo2 = round(SvO2Static + (currentTimer/timer) * (80-SvO2Static),2)
+        data["flow_rate"] = round(Vstatic + (currentTimer/timer) * (65-Vstatic),2)
+        data["p_ven"] = round(PvenStatic + (currentTimer/timer) * (75-PvenStatic),2)
+        data["t_art"] = round(SvO2Static + (currentTimer/timer) * (80-SvO2Static),2)
         currentTimer = int(time.time() - startTime)
     
     return redirect('/admin')
     
 @app.route('/admin/sliders', methods=['POST'])
 def sliders():
-    global flow_rate
-    global p_ven
-    global p_int
-    global delta_p
-    global p_art
-    global svo2
-    global t_art
+    global data
     print(request.form)
-    flow_rate = request.form['VS']
-    p_ven = request.form['PvenS']
-    p_int = request.form['PintS']
-    p_art = request.form['PartS']
-    delta_p = request.form['DeltaPS']
-    t_art = request.form['TartS']
-    svo2 = request.form['SvO2S']
-    cleanValues()
+    data["flow_rate"] = to_float(request.form['VS'])
+    data["p_ven"] = to_float(request.form['PvenS'])
+    data["p_int"] = to_float(request.form['PintS'])
+    data["delta_p"] = to_float(request.form['DeltaPS'])
+    data["p_art"] = to_float(request.form['PartS'])
+    data["t_art"] = to_float(request.form['TartS'])
+    data["svo2"] = to_float(request.form['SvO2S'])
     return redirect('/admin')
     
 @app.route('/admin')
 def controlPanel():
-    global flow_rate
-    global flow_rateMax
-    global flow_rateMin
-    global p_ven
-    global p_venMax
-    global p_venMin
-    global p_int
-    global p_intMax
-    global p_intMin
-    global p_art
-    global p_artMax
-    global p_artMin
-    global t_art
-    global t_artMax
-    global t_artMin
-    global svo2
-    global svo2Max
-    global svo2Min
-    global delta_p
-    global delta_pMax
-    global delta_pMin
-    global rpm
-    cleanValues()
-    return render_template('admin.html', V=flow_rate, Pven=p_ven, Pint=p_int, Part=p_art, DeltaP=delta_p, Tart=t_art, SvO2=svo2, VMin=flow_rateMin, VMax=flow_rateMax, PvenMin=p_venMin, PvenMax=p_venMax, PintMin=p_intMin, PintMax=p_intMax, PartMax=p_artMax, PartMin=p_artMin, TartMin=t_artMin, TartMax=t_artMax, SvO2Min=svo2Min, SvO2Max=svo2Max, DeltaPMin=delta_pMin, DeltaPMax=delta_pMax)
-
-@app.route('/admin/about')
-def about():
-    return render_template('about.html')
+    return render_template('admin.html', V=data["flow_rate"], Pven=data["p_ven"], Pint=data["p_int"], Part=data["p_art"], DeltaP=data["delta_p"], Tart=data["t_art"], SvO2=data["svo2"], VMin=FLOW_RATE_MIN, VMax=FLOW_RATE_MAX, PvenMin=P_VEN_MIN, PvenMax=P_VEN_MAX, PintMin=P_INT_MIN, PintMax=P_INT_MAX, PartMax=P_ART_MAX, PartMin=P_ART_MIN, TartMin=T_ART_MIN, TartMax=T_ART_MAX, SvO2Min=SVO2_MIN, SvO2Max=SVO2_MAX, DeltaPMin=DELTA_P_MIN, DeltaPMax=DELTA_P_MAX)
 
 # Front end code
 def load_data():
@@ -287,8 +220,22 @@ def load_data():
         return json.load(f)
 
 
-def check_safety(value, range):
-    return range[0] <= value <= range[1]
+def check_safety(value, y_range, r_range):
+    if r_range[0] <= value <= r_range[1]:
+        if y_range[0] <= value <= y_range[1]:
+            return 0, "safe"
+        else:
+            if value > y_range[1]:
+                return 1, "high"
+            else:
+                return 1, "low"
+    else:
+        if value > r_range[1]:
+            return 2, "high"
+        else:
+            return 2, "low"
+    
+
 
 @app.route('/')
 def home():
@@ -296,16 +243,26 @@ def home():
 
 @app.route('/dashboard')
 def dashboard():
-    safety_status = {
-        'flow_rate': check_safety(flow_rate, safety_ranges['flow_rate']),
-        'p_ven': check_safety(p_ven, safety_ranges['p_ven']),
-        'p_int': check_safety(p_int, safety_ranges['p_int']),
-        'p_art': check_safety(p_art, safety_ranges['p_art']),
-        't_art': check_safety(t_art, safety_ranges['t_art']),
-        'svo2': check_safety(svo2, safety_ranges['svo2']),
-        'delta_p': check_safety(delta_p, safety_ranges['delta_p']),
-    }
-    return render_template('dashboard.html', rpm=rpm, flow_rate=flow_rate, p_ven=p_ven, p_int=p_int, p_art=p_art, t_art=t_art, svo2=svo2, delta_p=delta_p, safety_status=safety_status)
+    safety_status = {}
+    first_yellow_msg = None
+    first_red_msg = None
+
+    for key in data.keys():
+        if key == "rpm":
+            continue
+        sev, direction = check_safety(data[key], YELLOW_ALARM[key], RED_ALARM[key])
+        safety_status[key] = sev  # keep exactly as your JS expects
+
+        if sev > 0:  # only build a message when in alarm
+            msg = ALERT_MESSAGE.get(key, {}).get(direction, {}).get(sev)
+            if sev == 2 and first_red_msg is None:
+                first_red_msg = msg
+            elif sev == 1 and first_yellow_msg is None:
+                first_yellow_msg = msg
+
+    banner_text = first_red_msg or first_yellow_msg
+
+    return render_template('dashboard.html', rpm=data["rpm"], flow_rate=data["flow_rate"], p_ven=data["p_ven"], p_int=data["p_int"], p_art=data["p_art"], t_art=data["t_art"], svo2=data["svo2"], delta_p=data["delta_p"], safety_status=safety_status, banner_text=banner_text)
 
 @app.route('/update')
 def update():
@@ -321,41 +278,52 @@ def update():
     delta_p = random.randint(0, 20)
     rpm = random.randint(3500, 4500)
     """
-    safety_status = {
-        'flow_rate': check_safety(flow_rate, safety_ranges['flow_rate']),
-        'p_ven': check_safety(p_ven, safety_ranges['p_ven']),
-        'p_int': check_safety(p_int, safety_ranges['p_int']),
-        'p_art': check_safety(p_art, safety_ranges['p_art']),
-        't_art': check_safety(t_art, safety_ranges['t_art']),
-        'svo2': check_safety(svo2, safety_ranges['svo2']),
-        'delta_p': check_safety(delta_p, safety_ranges['delta_p'])
-    }
+    safety_status = {}
+    first_yellow_msg = None
+    first_red_msg = None
+
+    for key in data.keys():
+        if key == "rpm":
+            continue
+        sev, direction = check_safety(data[key], YELLOW_ALARM[key], RED_ALARM[key])
+        safety_status[key] = sev  # keep exactly as your JS expects
+
+        if sev > 0:  # only build a message when in alarm
+            msg = ALERT_MESSAGE.get(key, {}).get(direction, {}).get(sev)
+            if sev == 2 and first_red_msg is None:
+                first_red_msg = msg
+            elif sev == 1 and first_yellow_msg is None:
+                first_yellow_msg = msg
+
+    banner_text = first_red_msg or first_yellow_msg
+
     return jsonify(
-        flow_rate=flow_rate, 
-        p_ven=p_ven, 
-        p_int=p_int, 
-        p_art=p_art, 
-        t_art=t_art, 
-        svo2=svo2, 
-        delta_p=delta_p, 
-        rpm=rpm, 
-        safety_status=safety_status
+        flow_rate=data["flow_rate"], 
+        p_ven=data["p_ven"], 
+        p_int=data["p_int"], 
+        p_art=data["p_art"], 
+        t_art=data["t_art"], 
+        svo2=data["svo2"], 
+        delta_p=data["delta_p"], 
+        rpm=data["rpm"], 
+        safety_status=safety_status,
+        banner_text=banner_text
     )
 
 @app.route('/rpm')
 def getRPM():
-    global rpm
+    global data
     return jsonify(
-        rpm=rpm
+        rpm=data["rpm"]
         )
 
 @app.route('/joystick-data', methods=['POST'])
 def joystick_data():
-    global rpm
-    data = request.get_json()
+    global data
+    json_data = request.get_json()
     if 'rpm' in data:
-        rpm = max(min(int(data['rpm']), rpmMax), rpmMin)  # clamp to safety bounds
-        print("Joystick RPM updated to:", rpm)
+        data["rpm"] = max(min(int(json_data['rpm']), RPM_MAX), RPM_MIN)  # clamp to safety bounds
+        print("Joystick RPM updated to:", data["rpm"])
     return '', 204
 
 

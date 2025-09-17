@@ -17,6 +17,11 @@
             <button id="exit-button" class="exit-button" onclick="exitApp()"> </button>
 
         </div>
+        <!-- ALERT -->
+        <div id="alert-text" class="alert-text">
+            {{ banner_text or "All systems nominal" }}
+        </div>
+
         <div class="time" id="current-time"></div>
     </div>
     <!-- <div style="position:absolute; top:0; left:0; width:800px; height:400px; background-color:rgba(255, 0, 0, 0.163); z-index:-1;"></div> -->
@@ -107,135 +112,220 @@
             </div>
         </div>
     </div>
+  <script>
+    (() => {
+      // -------- Config & helpers --------
+      const POLL_MS = 1000;
+      const RPM_POST_MIN_INTERVAL = 100;
+      const STATUS_CLASSES = ["status-0","status-1","status-2"]; // 0=safe,1=yellow,2=red
 
-    <script>
-        function updateRPM() {
-            fetch('/rpm')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('rpm-display').textContent = data.rpm;
+      const $ = (id) => document.getElementById(id);
+      const navEl = document.querySelector(".nav");
+
+      // (Removed LABELS — not needed when server provides banner_text)
+
+      // Map: [DOM id, payload key]
+      const VALUE_FIELDS = [
+        ["flow-rate", "flow_rate"],
+        ["p-ven",     "p_ven"],
+        ["p-int",     "p_int"],
+        ["p-art",     "p_art"],
+        ["t-art",     "t_art"],
+        ["svo2",      "svo2"],
+        ["delta-p",   "delta_p"],
+        ["rpm",       "rpm"],
+      ];
+
+      // Map: [cell id, safety_status key]
+      const STATUS_TARGETS = [
+        ["cell-flow-rate", "flow_rate"],
+        ["cell-p-ven",     "p_ven"],
+        ["cell-p-int",     "p_int"],
+        ["cell-p-art",     "p_art"],
+        ["cell-t-art",     "t_art"],
+        ["cell-svo2",      "svo2"],
+        ["cell-delta-p",   "delta_p"],
+      ];
+
+      async function fetchJSON(url, options = {}) {
+        try {
+          const res = await fetch(url, { cache: "no-store", ...options });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return await res.json();
+        } catch (err) {
+          console.error(`fetchJSON ${url} failed:`, err);
+          return null;
+        }
+      }
+
+      // show 0 correctly; only use "—" for null/undefined
+      function setText(id, value) {
+        const el = $(id);
+        if (!el) return;
+        el.textContent = (value === null || value === undefined) ? "—" : String(value);
+      }
+
+      function removeStatuses(el) {
+        STATUS_CLASSES.forEach(c => el.classList.remove(c));
+      }
+
+      function applyCircleStatus(cellId, status){
+        const circle = document.querySelector(`#${cellId} .circled`);
+        const s = (status === 1 || status === 2) ? status : 0;
+        if (!circle) return;
+        removeStatuses(circle);
+        circle.classList.add(STATUS_CLASSES[s]);
+      }
+
+      function applyValueStatus(cellId, status){
+        const val = document.querySelector(`#${cellId} .variable`);
+        const s = (status === 1 || status === 2) ? status : 0;
+        if (!val) return;
+        removeStatuses(val);
+        val.classList.add(STATUS_CLASSES[s]);
+      }
+
+      function setNavSeverity(severity /* 0/1/2 */, ss) {
+        if (!navEl) return;
+        removeStatuses(navEl);
+        const sev = (severity === 1 || severity === 2) ? severity : 0;
+        navEl.classList.add(STATUS_CLASSES[sev]);
+        // NOTE: We no longer set alert text here; it’s rendered by the server into #alert-text.  // <--
+      }  // <----- IMPORTANT: close the function (this was missing when you commented code)
+
+      // -------- Polling loop --------
+      async function pollUpdate(){
+        const data = await fetchJSON("/update");
+        if (!data) return;
+
+        // Update numbers
+        for (const [id, key] of VALUE_FIELDS) setText(id, data[key]);
+
+        // Apply tri-state to circle + value text
+        const ss = data.safety_status || {};
+        let maxSeverity = 0;
+        for (const [cellId, key] of STATUS_TARGETS){
+          const s = ss[key] ?? 0;
+          applyCircleStatus(cellId, s);
+          applyValueStatus(cellId, s);
+          if (s > maxSeverity) maxSeverity = s;
+
+          const alertTextEl = $("alert-text");
+          const bt = (data.banner_text && String(data.banner_text).trim())
+            ? data.banner_text
+            : "All systems nominal";
+
+          if (alertTextEl && alertTextEl.textContent !== bt) {
+            alertTextEl.textContent = bt;
+          }
+        }
+
+        // Nav color from most severe (unchanged behavior)
+        setNavSeverity(maxSeverity, ss);
+
+        // If you ever decide to include `banner_text` in /update, you can optionally refresh it here:
+        // const bt = data.banner_text;
+        // const alertTextEl = $("alert-text");
+        // if (alertTextEl && typeof bt === "string") alertTextEl.textContent = bt;
+      }
+
+      // -------- Clock --------
+      function updateTime() {
+        const el = $("current-time");
+        if (!el) return;
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString([], {
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
         });
-}
+      }
 
-        // Call every 500 ms
-        setInterval(updateRPM, 100);
-                function showPopup(message) {
-                    document.getElementById('modal-text').innerText = message + ' Information';
-                    document.getElementById('myModal').style.display = "block";
-                }
+      // -------- Modal + Exit (globals for inline handlers) --------
+      window.showPopup = function(message) {
+        setText("modal-text", `${message} Information`);
+        const modal = $("myModal");
+        if (modal) modal.style.display = "block";
+      };
+      window.closePopup = function() {
+        const modal = $("myModal");
+        if (modal) modal.style.display = "none";
+      };
+      window.exitApp = function() {
+        fetch("/exit", { method: "POST" }).catch(e => console.error("exitApp failed:", e));
+      };
 
-        function updateData() {
-            fetch('/update')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('flow-rate').innerText = data.flow_rate;
-                    document.getElementById('p-ven').innerText = data.p_ven;
-                    document.getElementById('p-int').innerText = data.p_int;
-                    document.getElementById('p-art').innerText = data.p_art;
-                    document.getElementById('t-art').innerText = data.t_art;
-                    document.getElementById('svo2').innerText = data.svo2;
-                    document.getElementById('delta-p').innerText = data.delta_p;
-                    document.getElementById('rpm').innerText = data.rpm;
+      // -------- Joystick (unchanged) --------
+      (function initJoystick() {
+        const knob = $("joystickKnob");
+        if (!knob) return;
 
-                    // Update cell classes based on safety status
-                    document.getElementById('cell-flow-rate').className = data.safety_status.flow_rate ? 'safe' : 'unsafe';
-                    document.getElementById('cell-p-ven').className = data.safety_status.p_ven ? 'safe' : 'unsafe';
-                    document.getElementById('cell-p-int').className = data.safety_status.p_int ? 'safe' : 'unsafe';
-                    document.getElementById('cell-p-art').className = data.safety_status.p_art ? 'safe' : 'unsafe';
-                    document.getElementById('cell-t-art').className = data.safety_status.t_art ? 'safe' : 'unsafe';
-                    document.getElementById('cell-svo2').className = data.safety_status.svo2 ? 'safe' : 'unsafe';
-                    document.getElementById('cell-delta-p').className = data.safety_status.delta_p ? 'safe' : 'unsafe';
-                });
+        let isDragging = false;
+        let lastAngle = null;
+        let totalRotation = 0;
+        const baseRPM = 4000;
+        let lastSent = 0;
+
+        function getAngle(e, element) {
+          const rect = element.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const t = (e.touches && e.touches[0]) || e;
+          return Math.atan2(t.clientY - cy, t.clientX - cx) * (180 / Math.PI);
         }
-
-
-        setInterval(updateData, 1000); // Update data every second
-
-        function updateTime() {
-            const now = new Date();
-            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            document.getElementById('current-time').innerText = now.toLocaleTimeString([], options);
+        function updateKnobRotation(angle) { knob.style.transform = `rotate(${angle}deg)`; }
+        function sendRPMToServer(rpm) {
+          const now = Date.now();
+          if (now - lastSent < RPM_POST_MIN_INTERVAL) return;
+          lastSent = now;
+          fetch("/joystick-data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rpm })
+          }).catch(e => console.error("sendRPMToServer failed:", e));
         }
-
-        setInterval(updateTime, 1000); // Update time every second
-        function closePopup() {
-            document.getElementById('myModal').style.display = "none";
+        function startDrag(e) { isDragging = true; lastAngle = getAngle(e, knob); e.preventDefault(); }
+        function onDrag(e) {
+          if (!isDragging) return;
+          e.preventDefault();
+          const newAngle = getAngle(e, knob);
+          let delta = newAngle - lastAngle;
+          if (delta > 180)  delta -= 360;
+          if (delta < -180) delta += 360;
+          totalRotation += delta;
+          lastAngle = newAngle;
+          updateKnobRotation(totalRotation);
+          let rpm = Math.round(baseRPM + totalRotation * 5);
+          rpm = Math.max(0, Math.min(8000, rpm));
+          setText("rpm", rpm);
+          sendRPMToServer(rpm);
         }
+        function endDrag() { isDragging = false; }
+
+        knob.addEventListener("mousedown", startDrag);
+        knob.addEventListener("touchstart", startDrag, { passive: false });
+        document.addEventListener("mousemove", onDrag);
+        document.addEventListener("touchmove", onDrag, { passive: false });
+        document.addEventListener("mouseup", endDrag);
+        document.addEventListener("touchend", endDrag);
+      })();
+
+      // -------- Kickoff --------
+      updateTime();
+      setInterval(updateTime, 1000);
+      pollUpdate();
+      setInterval(pollUpdate, POLL_MS);
+    })();
+
+    // Keep this if you want the alert text element immediately after the first icon
+    document.addEventListener("DOMContentLoaded", () => {
+      const icons = document.querySelector(".nav .icons");
+      const firstIcon = icons?.querySelector(".icon:first-child");
+      const alertEl = document.getElementById("alert-text");
+      if (icons && firstIcon && alertEl && alertEl.parentElement !== icons) {
+        firstIcon.insertAdjacentElement("afterend", alertEl);
+      }
+    });
     </script>
-    <script>
-    let knob = document.getElementById("joystickKnob");
-    let isDragging = false;
-    let lastAngle = null;
-    let totalRotation = 0;
-    let baseRPM = 4000;
-    let lastSent = 0;
 
-    function getAngle(e, element) {
-        const rect = element.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
-    }
-
-    function updateKnobRotation(angle) {
-        knob.style.transform = `rotate(${angle}deg)`;
-    }
-
-    function sendRPMToServer(rpm) {
-        const now = Date.now();
-        if (now - lastSent > 100) {  
-            fetch('/joystick-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rpm })
-            });
-            lastSent = now;
-        }
-    }
-
-    knob.addEventListener("mousedown", startDrag);
-    knob.addEventListener("touchstart", startDrag);
-    document.addEventListener("mousemove", onDrag);
-    document.addEventListener("touchmove", onDrag);
-    document.addEventListener("mouseup", endDrag);
-    document.addEventListener("touchend", endDrag);
-
-    function startDrag(e) {
-        isDragging = true;
-        lastAngle = getAngle(e, knob);
-        e.preventDefault();
-    }
-
-    function onDrag(e) {
-        if (!isDragging) return;
-        const newAngle = getAngle(e, knob);
-        let delta = newAngle - lastAngle;
-
-        if (delta > 180) delta -= 360;
-        if (delta < -180) delta += 360;
-
-        totalRotation += delta;
-        lastAngle = newAngle;
-
-        updateKnobRotation(totalRotation);
-
-        let rpm = Math.round(baseRPM + totalRotation * 5);
-        rpm = Math.max(0, Math.min(8000, rpm)); 
-        sendRPMToServer(rpm);
-    }
-
-    function endDrag(e) {
-        isDragging = false;
-    }
-</script>
-
-    <script>
-        function exitApp() {
-            fetch('/exit', { method: 'POST' });
-        }
-    </script>
 
 </body>
 </html>
