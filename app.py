@@ -11,54 +11,6 @@ import os
 import os, json, time, tempfile, shutil
 from pathlib import Path
 
-EXAMPLES_PATH = Path(__file__).with_name("examples.json")
-
-EXAMPLE_FIELDS = [
-    # name -> numeric type
-    ("flow_rate", float),
-    ("p_ven",     float),
-    ("p_int",     float),
-    ("p_art",     float),
-    ("t_art",     float),
-    ("svo2",      float),
-    ("delta_p",   float),
-    ("rpm",       int),   # optional, but nice to have
-]
-
-def _to_num(v, caster, default=None):
-    try:
-        return caster(v)
-    except (TypeError, ValueError):
-        return default
-
-def load_examples():
-    if not EXAMPLES_PATH.exists():
-        return []
-    try:
-        with EXAMPLES_PATH.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data if isinstance(data, list) else []
-    except Exception:
-        return []
-
-def _atomic_write_json(path: Path, payload):
-    tmp = Path(tempfile.mkstemp(prefix="examples_", suffix=".json")[1])
-    try:
-        with tmp.open("w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2)
-        shutil.move(str(tmp), str(path))
-    finally:
-        try:
-            if tmp.exists():
-                tmp.unlink()
-        except Exception:
-            pass
-
-def save_examples(examples_list):
-    _atomic_write_json(EXAMPLES_PATH, examples_list)
-
-
-
 # Initialize flask app
 app = Flask(__name__)
 
@@ -87,7 +39,8 @@ SVO2_MIN = 30.0
 
 RPM_MIN = 0
 RPM_MAX = 30000
-# Data Array
+
+# Data Dictionary
 data = {"flow_rate": round((FLOW_RATE_MAX + FLOW_RATE_MIN) / 2, 2), #flow
         "p_ven": round((P_VEN_MAX + P_VEN_MIN) / 2, 2), #p_ven
         "p_int": round((P_INT_MAX + P_INT_MIN) / 2, 2), #p_int
@@ -98,7 +51,7 @@ data = {"flow_rate": round((FLOW_RATE_MAX + FLOW_RATE_MIN) / 2, 2), #flow
         "svo2": round((SVO2_MAX + SVO2_MIN) / 2, 2) #svo2
 }
 
-# Alarm ranges
+# Alarm ranges and text
 YELLOW_ALARM = {
     "flow_rate": [2, 6], # Flow
     "p_ven": [-40, -10], #Pven
@@ -151,11 +104,15 @@ ALERT_MESSAGE = {
     }
 }
 
+#
 def initValues():
+    """
+    Initializes data to be the midpoint of their maximums and minimums
+    """
     global data
     data = {
         "flow_rate": round((FLOW_RATE_MAX + FLOW_RATE_MIN) / 2, 2),
-        "p_ven":     round((P_VEN_MAX   + P_VEN_MIN)   / 2, 2),
+        "p_ven":     round((P_VEN_MAX+ P_VEN_MIN)   / 2, 2),
         "p_int":     round((P_INT_MAX   + P_INT_MIN)   / 2, 2),
         "delta_p":   round((DELTA_P_MAX + DELTA_P_MIN) / 2, 2),
         "rpm":       0,
@@ -166,14 +123,24 @@ def initValues():
 
 @app.route('/admin/setPresets')
 def setPresets():
+    """
+    Flask route to show screen allowing admin to change maximum and minimum values
+    """
     return render_template('setPresets.html')
 
 def _to_float(v, default=None):
+    """
+    Returns a float if the parameter v is able to be converted into one
+    """
     try: return float(v)
     except (TypeError, ValueError): return default
 
 @app.route('/admin/setPresets/send', methods=['POST'])
 def setPresetsSend():
+    """
+    Flask route that triggers after admin chooses to send preset values. T
+    This is the only way to change global constants of maximums and minimums
+    """
     global FLOW_RATE_MAX, FLOW_RATE_MIN, P_VEN_MAX, P_VEN_MIN, P_INT_MAX, P_INT_MIN
     global P_ART_MAX, P_ART_MIN, T_ART_MAX, T_ART_MIN, SVO2_MAX, SVO2_MIN, DELTA_P_MAX, DELTA_P_MIN
 
@@ -218,6 +185,9 @@ def setPresetsSend():
 
 @app.route('/admin/loading/<scen>', methods=['POST'])
 def exampleScenario1Loading(scen):
+    """
+    Flask route that shows loading screen when example timer is in use
+    """
     timer = request.form['example1Length']
     if timer:
         return render_template('loading.html', scen=scen, timer=timer)
@@ -226,6 +196,10 @@ def exampleScenario1Loading(scen):
 
 @app.route('/admin/exampleScenario1/<timer>', methods=['GET'])
 def exampleScenario1(timer):
+    """
+    creates an example scenario where flow, p_ven, and t_art approach
+    preset values over a period of time
+    """
     global data
     if timer.isdigit() == False:
         return redirect('/admin')
@@ -246,6 +220,9 @@ def exampleScenario1(timer):
     
 @app.route('/admin/sliders', methods=['POST'])
 def sliders():
+    """
+    gets data from the sliders and alters the values
+    """
     global data
     data["flow_rate"] = _to_float(request.form.get('VS'),      data["flow_rate"])
     data["p_ven"]     = _to_float(request.form.get('PvenS'),   data["p_ven"])
@@ -259,15 +236,32 @@ def sliders():
     
 @app.route('/admin')
 def controlPanel():
+    """
+    renders administrator view
+    """
     return render_template('admin.html', V=data["flow_rate"], Pven=data["p_ven"], Pint=data["p_int"], Part=data["p_art"], DeltaP=data["delta_p"], Tart=data["t_art"], SvO2=data["svo2"], VMin=FLOW_RATE_MIN, VMax=FLOW_RATE_MAX, PvenMin=P_VEN_MIN, PvenMax=P_VEN_MAX, PintMin=P_INT_MIN, PintMax=P_INT_MAX, PartMax=P_ART_MAX, PartMin=P_ART_MIN, TartMin=T_ART_MIN, TartMax=T_ART_MAX, SvO2Min=SVO2_MIN, SvO2Max=SVO2_MAX, DeltaPMin=DELTA_P_MIN, DeltaPMax=DELTA_P_MAX)
 
 # Front end code
 def load_data():
+    """
+    loads json data
+    """
     with open('data.json', 'r') as f:
         return json.load(f)
 
 
 def check_safety(value, y_range, r_range):
+    """
+    Function checks if a value is inside alert ranges and returns 
+    the severity and direction of them
+    Paremeters: 
+        value (float): the piece of data i.e. flow_rate
+        y_range (List): the range for a yellow alert
+        r_range (List): the range for a red alert
+    Returns:
+        (int) The severity (safe, yellow, red)
+        (str) The direction of the alert (too high or too low)
+    """
     if r_range[0] <= value <= r_range[1]:
         if y_range[0] <= value <= y_range[1]:
             return 0, "safe"
@@ -286,10 +280,16 @@ def check_safety(value, y_range, r_range):
 
 @app.route('/')
 def home():
+    """
+    renders the homescreen
+    """
     return render_template('home.html')
 
 @app.route('/dashboard')
 def dashboard():
+    """
+    renders the dashboard
+    """
     global data
     safety_status = {}
     first_yellow_msg = None
@@ -368,6 +368,9 @@ def getRPM():
 
 @app.route('/joystick-data', methods=['POST'])
 def joystick_data():
+    """
+    backend for joystick
+    """
     global data
     json_data = request.get_json(silent=True) or {}
     rpm_raw = json_data.get('rpm')
@@ -384,6 +387,9 @@ def joystick_data():
 
 @app.route('/exit', methods=['POST'])
 def exit():
+    """
+    exits out of application
+    """
     result = subprocess.run(
         ["sudo", "pkill", "-f", "chromium"],
         capture_output=True,
