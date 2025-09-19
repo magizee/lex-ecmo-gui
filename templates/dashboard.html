@@ -27,42 +27,43 @@
     </div>
 
   
-    <div style="position:absolute; top:0; left:0; width:800px; height:475px; background-color:rgba(255, 0, 0, 0.163); z-index:-1;"></div>
+    <!-- <div style="position:absolute; top:0; left:0; width:800px; height:475px; background-color:rgba(255, 0, 0, 0.163); z-index:-1;"></div> -->
     <div class="content">
         <div class="container">
         <table>
             <tr>
                 <td id="cell-flow-rate" colspan="3">
-                    <p class="circled"><span>v&#775;</span></p>
+                    <p class="circled"><span>V&#775;</span></p>
                     <span class="variable" id="flow-rate">{{flow_rate }}</span>
                     <span class="unit">lpm</span>
                 </td>
                 <td id="cell-rpm" colspan="3">
                     <p class="circled"><span>&#8635;</span></p>
                     <span class="variable" id="rpm">{{ rpm }}</span>
+                    <p class="rpm-shadow">000000</p>
                     <span class="unit">rpm</span>
                 </td>
             </tr>
             <tr>
                 <td id="cell-p-ven" colspan="3">
-                    <p class="circled"><span>p<sub>ven</sub></span></p>
+                    <p class="circled"><span>p<sub>Ven</sub></span></p>
                     <span class="variable" id="p-ven">{{ p_ven }}</span>
                     <span class="unit">mmHg</span>
                 </td>
                 <td id="cell-p-art" colspan="3">
-                    <p class="circled"><span>p<sub>art</sub></span></p>
+                    <p class="circled"><span>p<sub>Art</sub></span></p>
                     <span class="variable" id="p-art">{{ p_art }}</span>
                     <span class="unit">mmHg</span>
                 </td>
             </tr>
             <tr>
                 <td id="cell-p-int" colspan="3">
-                    <p class="circled"><span>p<sub>int</sub></span></p>
+                    <p class="circled"><span>p<sub>Int</sub></span></p>
                     <span class="variable" id="p-int">{{ p_int }}</span>
                     <span class="unit">mmHg</span>
                 </td>
                 <td id="cell-t-art" colspan="3">
-                    <p class="circled"><span>T<sub>art</sub></span></p>
+                    <p class="circled"><span>T<sub>Art</sub></span></p>
                     <span class="variable" id="t-art">{{ t_art }}</span>
                     <span class="unit">&deg;C</span>
                 </td>
@@ -93,7 +94,7 @@
                 <button onclick="location.href='/'"><i class="fas fa-home"></i></button>
                 <button onclick="location.href='/dashboard'"><i class="fa-solid fa-grip"></i></button>
             </div>
-            <button class="circle-button"><i class="fa-solid fa-s"></i><i class="fa-solid fa-triangle-exclamation"></i></button>
+            <button class="circle-button"><i class="fa-solid fa-s"></i>  <i class="fa-solid fa-triangle-exclamation"></i></button>
             <button class="circle-button disabled" disabled><i class="fa-solid fa-link"></i></button>
             <button class="rect-button"><i class="fa-solid fa-battery-full"></i></button>
         </div>

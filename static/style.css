@@ -176,7 +176,7 @@ body {
 table {
     border-collapse: collapse;
     width: 470px;
-    height: 350px;
+    height: 435px;
 }
 
 td {
@@ -204,7 +204,7 @@ td {
     background-color: #ffffff;
     text-align: center;
     box-sizing: border-box;
-    font-size: auto; /* 35px */
+    font-size: 23px; /* 35px */
     font-weight: bold;
     transition: background-color .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
 
@@ -213,8 +213,8 @@ td {
 .circled.status-0,
 .circled.status-1,
 .circled.status-2 {
-  color: #0b3b6b !important;   /* navy */
-  border-color: #0b3b6b;       /* navy ring to match text */
+  color: navy !important;   /* navy */
+  border-color: navy;       /* navy ring to match text */
 }
 
 /* 0 = safe (white), 1 = yellow, 2 = red */
@@ -229,6 +229,17 @@ td {
 }
 .circled > span { color: inherit !important; line-height: 1; }
 
+.rpm-shadow{
+  position: fixed;
+  font-size: 45px; /* 80px */
+  top: 35px; /* 5px */
+  left: 320px; /* 5px */
+  font-weight: 500; 
+  color: rgba(255, 255, 255, 0);
+  background-color: navy;
+  z-index: -1;              /* behind content */
+
+}
 
 .variable{ transition: color .15s ease; }
 .variable.status-0{ color: navy; }
@@ -240,20 +251,24 @@ td {
 
 
 .variable {
-    font-size: 30px; /* 80px */
+    font-size: 60px; /* 80px */
     position: absolute;
-    bottom: 5px; /* 5px */
+    top: 30px; /* 5px */
     right: 5px; /* 5px */
     color: navy;
-    font-weight: bold;
+    font-weight: 500;
 
 
 }
+#rpm {
+  color: rgb(255, 255, 255);
+}
+
 
 .unit {
-    font-size: 15px;
+    font-size: 20px;
     position: absolute;
-    top:5px;
+    top:10px;
     right: 5px;
     color: navy;
 }
@@ -312,8 +327,17 @@ home and dash button on right side
 .last-row td {
     font-size: 30px;
     color: navy;
-    height: 10px;
+    height: 5px;
     padding: 5px;
+}
+table tr.last-row {
+  height: 30px;             /* fixed height */
+}
+
+table tr.last-row td {
+  height: 30px;             /* force td cells to respect it */
+  padding: 0;               /* remove padding so it doesn’t push taller */
+  line-height: 30px;        /* vertically align inline content */
 }
 
 .circle-button {
@@ -322,25 +346,30 @@ home and dash button on right side
     align-items: center;
     border: 2px solid navy; /* 3px */
     border-radius: 40px;
-    height: 60px;
+    height: 50px;
     width: 80px;
     margin: 5px 0; /* 10px 0 */
     background-color: #ffffff;
     color: navy;
-    font-size: 30px;
+    font-size: 20px;
     font-weight: bold;
+}
+sub {
+  font-size: 0.6em;   /* 60% of the parent’s font size */
+  vertical-align: sub; /* keeps it in the subscript position */
 }
 
 .rect-button {
-    height: 60px;
-    width: 80px;
+    height: 80px;
+    width: 85px;
     border: 2px solid navy;
     background-color: #ffffff;
     color: navy;
     font-size: 30px;
     font-weight: bold;
     position: absolute;
-    top: calc(100%); /* Move down by the height of the table row plus margin */
+    margin-top: 355px;
+
 }
 
 /* 0 = safe (green), 1 = yellow (warn), 2 = red (critical) */
@@ -401,16 +430,18 @@ home and dash button on right side
 }
 
 .circle {
-    width: 100%;
-    height: 100%;
+    width: 200px;
+    height: 200px;
     background-color: #676872;
     border-radius: 50%;
-    position: relative;
+    position: fixed;
     display: flex;
+    right:75px;
+    bottom:225px;
     align-items: center;
     justify-content: center;
     font-family: 'Nimbus Sans', sans-serif;
-    font-size: 16px;
+    font-size: 20px;
     color: navy;
 }
 
