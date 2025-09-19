@@ -230,10 +230,10 @@ td {
 .circled > span { color: inherit !important; line-height: 1; }
 
 .rpm-shadow{
-  position: fixed;
+  position: absolute;
   font-size: 45px; /* 80px */
-  top: 35px; /* 5px */
-  left: 320px; /* 5px */
+  bottom: -44px; /* 5px */
+  left: 85px; /* 5px */
   font-weight: 500; 
   color: rgba(255, 255, 255, 0);
   background-color: navy;
@@ -422,7 +422,7 @@ sub {
 
 
 .circle-container {
-    position: fixed;
+    position: absolute;
     top: 230px;
     left: 615px;
     width: 150px;
@@ -434,10 +434,10 @@ sub {
     height: 200px;
     background-color: #676872;
     border-radius: 50%;
-    position: fixed;
+    position: absolute;
     display: flex;
-    right:75px;
-    bottom:225px;
+    right:-15px;
+    bottom:-85px;
     align-items: center;
     justify-content: center;
     font-family: 'Nimbus Sans', sans-serif;
