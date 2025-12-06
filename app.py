@@ -1,6 +1,6 @@
 # Import Modules
 from flask import Flask, redirect, render_template, jsonify, request
-import random
+import random, math, time
 import json
 from flask_wtf import FlaskForm
 from wtforms import DecimalRangeField
@@ -104,6 +104,15 @@ ALERT_MESSAGE = {
     }
 }
 
+flow_state = [False, 0.0]
+p_ven_state = [False, 0.0]
+p_int_state=[False, 0.0]
+p_art_state = [False, 0.0]
+t_art_state = [False, 0.0]
+svo2_state = [False, 0.0]
+delta_p_state = [False, 0.0]
+
+
 #
 def initValues():
     """
@@ -134,6 +143,56 @@ def _to_float(v, default=None):
     """
     try: return float(v)
     except (TypeError, ValueError): return default
+
+import random
+stork = 0.0
+
+def clip(num, input, amount):
+    if input >= num+amount:
+        return num + amount
+    elif input <= num-amount:
+        return num - amount
+    else:
+        return input
+
+def oscillate(num, amount, round_amt, p, increment, state):
+    global flow_state, p_ven_state, p_int_state, p_art_state, t_art_state, svo2_state, delta_p_state
+
+    r = random.random()
+    r2 = random.randint(0, 1)
+    multiplier = random.randint(1, 2)
+
+
+    # if state[0]:
+    #     if(r < 2*p):
+    #         state[0] = False
+    #     return state[1]
+    # else:
+    #     if( r < p):
+    #         state[0] = True
+    #         if r2 == 0:
+    #             state[1] = round(clip(num, num + increment*multiplier, amount), round_amt)
+    #         else:
+    #             state[1] = round(clip(num, num - increment*multiplier, amount), round_amt)
+    #         return state[1]
+    #     return num
+
+    if (r < p):
+        #roll an increment and add it
+        # clip it to make sure it doesn't go over
+        # record new value and store in "stork"
+        #return stork
+        if r2 == 0:
+            state[1] = round(clip(num, num + increment*multiplier, amount), round_amt)
+        else:
+            state[1] = round(clip(num, num - increment*multiplier, amount), round_amt)
+        return state[1]
+    else:
+        return state[1]
+     #if i dont hit, just return the last value! stork
+
+
+
 
 @app.route('/admin/setPresets/send', methods=['POST'])
 def setPresetsSend():
@@ -311,7 +370,13 @@ def dashboard():
 
     banner_text = first_red_msg or first_yellow_msg
 
-    return render_template('dashboard.html', rpm=data["rpm"], flow_rate=data["flow_rate"], p_ven=data["p_ven"], p_int=data["p_int"], p_art=data["p_art"], t_art=data["t_art"], svo2=data["svo2"], delta_p=data["delta_p"], safety_status=safety_status, banner_text=banner_text)
+    return render_template('dashboard.html',  flow_rate=f"{oscillate(num=data["flow_rate"], amount=0.03, round_amt=2, p=0.50, increment=0.01, state=flow_state):.2f}", 
+        p_ven=oscillate(data["p_ven"], 3, 0, 0.30, 1, p_ven_state), 
+        p_int=oscillate(data["p_int"], 3, 0, 0.30,  1, p_int_state), 
+        p_art=oscillate(data["p_art"], 3, 0, 0.30,  1, p_art_state), 
+        t_art=oscillate(data["t_art"], 0.1, 1, 0.20,  0.1, t_art_state), 
+        svo2=oscillate(data["svo2"], 2, 0, 0.10,  1, svo2_state), 
+        delta_p=oscillate(data["delta_p"], 3, 0, 0.10, 1, delta_p_state),  safety_status=safety_status, banner_text=banner_text)
 
 @app.route('/update')
 def update():
@@ -322,6 +387,16 @@ def update():
     Returns everything as a json
     Called once a second
     """
+    global flow_state, p_ven_state, p_int_state, p_art_state, t_art_state, svo2_state, delta_p_state
+    oscillated = {"flow_rate": oscillate(data["flow_rate"], 0.03, 2, 0.50, 0.01, flow_state), #flow
+        "p_ven": oscillate(data["p_ven"], 3, 0, 0.10, 1, p_ven_state), 
+        "p_int": oscillate(data["p_int"], 3, 0, 0.10, 1, p_int_state), 
+        "p_art": oscillate(data["p_art"], 3, 0, 0.10, 1, p_art_state), 
+        "t_art": oscillate(data["t_art"], 0.1, 1, 0.05, 0.1, t_art_state), 
+        "svo2": oscillate(data["svo2"], 2, 0, 0.03, 1, svo2_state), 
+        "delta_p":oscillate(data["delta_p"], 3, 0, 0.07, 1, delta_p_state)
+    }
+    
     # Update example values (in a real application, these would be fetched from sensors or a database)
     safety_status = {}
     first_yellow_msg = None
@@ -344,13 +419,13 @@ def update():
     banner_text = first_red_msg or first_yellow_msg
 
     return jsonify(
-        flow_rate=data["flow_rate"], 
-        p_ven=data["p_ven"], 
-        p_int=data["p_int"], 
-        p_art=data["p_art"], 
-        t_art=data["t_art"], 
-        svo2=data["svo2"], 
-        delta_p=data["delta_p"], 
+        flow_rate=f"{oscillated["flow_rate"]:.2f}", 
+        p_ven=oscillated["p_ven"], 
+        p_int=oscillated["p_int"], 
+        p_art=oscillated["p_art"], 
+        t_art=oscillated["t_art"], 
+        svo2=oscillated["svo2"], 
+        delta_p=oscillated["delta_p"], 
         rpm=data["rpm"], 
         safety_status=safety_status,
         banner_text=banner_text

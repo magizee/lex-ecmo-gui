@@ -115,12 +115,22 @@
             </div>
         </div>
     </div>
+
+  <audio id="alarm-audio"
+       src="{{ url_for('static', filename='sounds/alarm.wav') }}"
+       preload="auto"
+       loop>
+  </audio>
+
   <script>
     (() => {
       // -------- Config & helpers --------
-      const POLL_MS = 1000;
+      const POLL_MS = 500;
       const RPM_POST_MIN_INTERVAL = 100;
       const STATUS_CLASSES = ["status-0","status-1","status-2"]; // 0=safe,1=yellow,2=red
+
+      const alarmAudio = document.getElementById("alarm-audio");
+      let lastAlarmActive = false;
 
       const $ = (id) => document.getElementById(id);
       const navEl = document.querySelector(".nav");
@@ -225,6 +235,25 @@
 
         // Nav color from most severe (unchanged behavior)
         setNavSeverity(maxSeverity, ss);
+          // --- Alarm sound based on severity ---
+        const alarmActive = maxSeverity >= 2;  // 2 = red; change to >=1 if you want yellow too
+
+        if (alarmAudio) {
+          if (alarmActive && !lastAlarmActive) {
+            // rising edge: alarm just became active
+            alarmAudio.currentTime = 0;
+            alarmAudio
+              .play()
+              .catch(err => console.error("Failed to play alarm:", err));
+          } else if (!alarmActive && lastAlarmActive) {
+            // falling edge: alarm just cleared
+            alarmAudio.pause();
+            alarmAudio.currentTime = 0;
+          }
+        }
+
+        lastAlarmActive = alarmActive;
+
 
         // If you ever decide to include `banner_text` in /update, you can optionally refresh it here:
         // const bt = data.banner_text;
