@@ -130,6 +130,7 @@
       const STATUS_CLASSES = ["status-0","status-1","status-2"]; // 0=safe,1=yellow,2=red
 
       const alarmAudio = document.getElementById("alarm-audio");
+      alarmAudio.volume = 1.0;   // max is 1.0, try 0.8–1.0
       let lastAlarmActive = false;
 
       const $ = (id) => document.getElementById(id);
