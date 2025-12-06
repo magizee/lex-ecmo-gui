@@ -370,7 +370,7 @@ def dashboard():
 
     banner_text = first_red_msg or first_yellow_msg
 
-    return render_template('dashboard.html',  flow_rate=f"{oscillate(num=data["flow_rate"], amount=0.03, round_amt=2, p=0.50, increment=0.01, state=flow_state):.2f}", 
+    return render_template('dashboard.html',  flow_rate=f"{oscillate(num=data['flow_rate'], amount=0.03, round_amt=2, p=0.50, increment=0.01, state=flow_state):.2f}", 
         p_ven=oscillate(data["p_ven"], 3, 0, 0.30, 1, p_ven_state), 
         p_int=oscillate(data["p_int"], 3, 0, 0.30,  1, p_int_state), 
         p_art=oscillate(data["p_art"], 3, 0, 0.30,  1, p_art_state), 
@@ -419,7 +419,7 @@ def update():
     banner_text = first_red_msg or first_yellow_msg
 
     return jsonify(
-        flow_rate=f"{oscillated["flow_rate"]:.2f}", 
+        flow_rate=f"{oscillated['flow_rate']:.2f}", 
         p_ven=oscillated["p_ven"], 
         p_int=oscillated["p_int"], 
         p_art=oscillated["p_art"], 
